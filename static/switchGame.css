@@ -1,0 +1,19 @@
+* {
+  padding: 0px;
+  margin: 0;
+  text-align: center;
+  background-color: black;
+}
+canvas {
+  padding: 2.5em;
+}
+#mainHeading {
+  padding: 1.25em;
+  font-size: 2.5em;
+  color: white
+}
+#currentNum {
+  padding-bottom: 0.125em;
+  font-size: 2.25em;
+  color: white;
+}

@@ -1,0 +1,80 @@
+$def with (form, stunned, num, color, error)
+
+<html>
+	<head><title>shadowCaster login</title>
+		<link href='/static/font.css' rel='stylesheet'>
+		<style>
+			.concernForm {
+				text-align: left;
+				color: rgb(255, 255, 255);
+				font-size: 30px;
+				font-family: 'Quantico'
+			}
+			.concern{
+				text-align: center;
+				color: rgb(255, 255, 255);
+				font-size: 40px;
+				font-family: 'Quantico'
+			}
+			input {
+   				width: 500px;
+				height: 40px;
+				font-size: 20px;
+				font-family: 'Quantico'  
+			 }
+		</style>
+		<script type="text/javascript">
+			function sleep(ms) {
+				return new Promise(resolve => setTimeout(resolve, ms));
+			}
+			function flash() {
+				setInterval(f, (Math.random() * 2000));
+			}
+			async function f(){
+				for(i=0; i < (Math.random() * 16); i++){
+					document.getElementById("logo").src = "/static/red.png";
+					await sleep(50);
+					document.getElementById("logo").src = "/static/white.png";
+					await sleep(50);
+				}
+			}
+			var oReq;
+			function stunReqListener () {
+				//console.log(this.responseText);
+				if(this.responseText == "True"){window.location.reload(1);}
+			}
+			function makeStunRequest(){
+				oReq = new XMLHttpRequest();
+				oReq.addEventListener("load", stunReqListener);
+				oReq.open("GET", "/stunstatus");
+				oReq.send();
+			}	
+			
+		</script>
+	</head>
+	<body bgcolor="black">
+		<center>
+		$if stunned > 0:
+			<img id="logo" width=300 src="/static/red.png" onload=flash()>
+			<div class="concern" id="timer">STUNNED</div>
+			<script src="/static/timer.js"></script>
+			<script>
+				setTimer(document.getElementById("timer"), $(stunned) );
+				setTimeout(function(){window.location.reload(1);}, 5000);			
+			</script>
+		$else:
+			<script>setInterval(makeStunRequest, 5000);</script>
+			<img id="logo" width=300 src="/static/$(color).png">
+			<div class="concern"><font color="red"> shadowCaster $(num) </font></div>
+			<form name="main" method="post">
+				<font color="red">
+				$if form:
+					$:form.render()
+				</font>
+			</form>
+			$if error != "":
+				<p><div class="concern"> $error </div></p>
+
+		</center>
+	</body>
+</html>
