@@ -1,4 +1,4 @@
-// isMobile and the following if statement is from https://www.mattcromwell.com/detecting-mobile-devices-javascript/
+// isMobile and the condition of the following if statement is from https://www.mattcromwell.com/detecting-mobile-devices-javascript/
 
 var isMobile = {
   Android: function () {
@@ -21,14 +21,42 @@ var isMobile = {
   }
 };
 
-jQuery(function ($) {
+$('#blue').click(function () {
   if (isMobile.any()) {
-    $('#blue').addClass('mobile')
-    $('#dark').addClass('mobile')
-    $('#green').addClass('mobile')
-    $('#red').addClass('mobile')
+    $(this).addClass('mobile');
+    setTimeout(function () {
+      $('#blue').removeClass('mobile');
+    }, 70);
   }
-});
+})
+
+
+$('#red').click(function () {
+  if (isMobile.any()) {
+    $(this).addClass('mobile');
+    setTimeout(function () {
+      $('#red').removeClass('mobile');
+    }, 70);
+  }
+})
+
+$('#green').click(function () {
+  if (isMobile.any()) {
+    $(this).addClass('mobile');
+    setTimeout(function () {
+      $('#green').removeClass('mobile');
+    }, 70);
+  }
+})
+
+$('#dark').click(function () {
+  if (isMobile.any()) {
+    $(this).addClass('mobile');
+    setTimeout(function () {
+      $('#dark').removeClass('mobile');
+    }, 70);
+  }
+})
 
 // Simon game from: https://codepen.io/mrkaluzny/full/pbVxxd
 
