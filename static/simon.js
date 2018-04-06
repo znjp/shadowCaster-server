@@ -26,7 +26,7 @@ $('#blue').click(function () {
     $(this).addClass('mobile');
     setTimeout(function () {
       $('#blue').removeClass('mobile');
-    }, 70);
+    }, 105);
   }
 })
 
@@ -36,7 +36,7 @@ $('#red').click(function () {
     $(this).addClass('mobile');
     setTimeout(function () {
       $('#red').removeClass('mobile');
-    }, 70);
+    }, 105);
   }
 })
 
@@ -45,7 +45,7 @@ $('#green').click(function () {
     $(this).addClass('mobile');
     setTimeout(function () {
       $('#green').removeClass('mobile');
-    }, 70);
+    }, 105);
   }
 })
 
@@ -54,7 +54,7 @@ $('#dark').click(function () {
     $(this).addClass('mobile');
     setTimeout(function () {
       $('#dark').removeClass('mobile');
-    }, 70);
+    }, 105);
   }
 })
 
