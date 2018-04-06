@@ -3,6 +3,7 @@
   margin: 0;
   text-align: center;
   background-color: black;
+  color: #F5F5F5;
 }
 canvas {
   padding: 2.5em;
@@ -10,10 +11,88 @@ canvas {
 #mainHeading {
   padding: 1.25em;
   font-size: 2.5em;
-  color: white
 }
 #currentNum {
   padding-bottom: 0.125em;
   font-size: 2.25em;
-  color: white;
+}
+
+.counter {
+  font-size: 2.125em;
+}
+
+.toggle div {
+  padding: 3em;
+  border-style: solid;
+  border-widt* {
+  padding: 0px;
+  margin: 0;
+  text-align: center;
+  background-color: black;
+  color: #F5F5F5;
+}
+canvas {
+  padding: 2.5em;
+}
+#mainHeading {
+  padding: 1.25em;
+  padding-top: 6vh;
+  padding-bottom: 4vh;
+  font-size: 2.5em;
+}
+#currentNum {
+  padding-bottom: 3vh;
+  font-size: 2.25em;
+}
+
+.counter {
+  font-size: 2.125em;
+}
+
+.toggle div {
+  padding: 4.75vw;
+  border-style: solid;
+  border-width: 0.75vw;
+  border-radius: 100vh;
+  border-color: #F5F5F5;
+}
+
+.on div {
+  background-color: rgb(65, 222, 65);
+}
+
+.off div{
+  background-color: rgb(218, 46, 46);
+}
+
+.toggle {
+  padding: 0.5vw;
+}
+
+.game {
+  padding-top: 2vh;
+  margin-left:auto;
+  margin-right:auto;
+}
+h: 0.5em;
+  border-radius: 4em;
+  border-color: #F5F5F5;
+}
+
+.on div {
+  background-color: rgb(65, 222, 65);
+}
+
+.off div{
+  background-color: rgb(218, 46, 46);
+}
+
+.toggle {
+  padding: 0.5em;
+}
+
+.game {
+  padding-top: 2em;
+  margin-left:auto;
+  margin-right:auto;
 }
