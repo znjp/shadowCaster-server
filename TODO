@@ -24,7 +24,10 @@ Admin Interface for SC
  - Adjust the energy levels
  - Stun and flag duration
  - test LEDs; Get GPIO status
+ - Add/remove teams; change password
 
+Real DB integration
+ - admin teams 
 
 
 **Running the Game**
