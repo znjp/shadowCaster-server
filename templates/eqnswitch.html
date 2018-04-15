@@ -51,7 +51,7 @@ $def with (stunned)
 
   <body bgcolor="black">
     <center>
-      $if stunned > 0:
+    $if stunned > 0:
       <img id="logo" width=300 src="/static/red.png" onload=flash()>
       <div class="concern" id="timer">STUNNED</div>
       <script src="/static/timer.js"></script>
@@ -61,7 +61,7 @@ $def with (stunned)
           window.location.reload(1);
         }, 5000);
       </script>
-      $else:
+    $else:
       <script>
         setInterval(makeStunRequest, 5000);
       </script>

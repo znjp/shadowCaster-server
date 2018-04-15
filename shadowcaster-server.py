@@ -9,6 +9,7 @@ import pickle
 from web import form
 import threading
 import signal
+import json
 
 web.config.debug = False  # This line causes this script to be somewhat unresponsive to ctrl-C
 DEBUG = True
@@ -16,19 +17,24 @@ DEBUG = True
 # SHADOWCASTER GLOBAL SETTINGS
 
 # IMPORTANT: This must be set to the PWD of the python script if run as an init service
-os.chdir("/home/pi/shadowcaster-server")
+#os.chdir("/home/pi/shadowcaster-server")
 
-# Set the shadowcaster number here
-SHADOWCASTER = 7
+#Load the configuration file
+with open('scconfig.json', 'r') as f:
+    config = json.load(f)
+# And set the initial values
+SHADOWCASTER = config["SHADOWCASTER"] # SC Number
+TOTALPUZZLES = config["TOTALPUZZLES"] #Total Number of Puzzles
+ENERGY = config["ENERGY"]  #Energy level
+STUNDURATION = config["STUNDURATION"]  # Stun duration in seconds
+RELEASEDURATION = config["RELEASEDURATION"]  #Release duration In seconds
+f.close()
 
-ENERGY = 100  # Initial energy
 COLOR = "blue"  # Initial color
-STUNDURATION = 120  # In seconds
-FLAGDURATION = 120  # In seconds
 
 # Global variables used for stunning
 STUNNED = False
-STUNTIME = 0
+STUNTIME = 0 #Stun time remaining
 
 # GPIO Settings
 NOGPIO = True
@@ -57,21 +63,27 @@ db = {}
 last_sync = 0
 
 render = web.template.render('templates/')
-urls = ('/', 'admin',
-        '/admin', 'admin',  # puzzle page
+urls = ('/', 'sc',
+        '/sc', 'sc',  # puzzle page
         '/stun', 'stun',  # stun the shadowcaster
         '/unstun', 'unstun',  # unstun the shadowcaster
         '/stunstatus', 'stunstatus',  # Is the shadowcaster stunned?
         '/login',  'login',  # login
         '/logout', 'logout',  # logout
         '/energy', 'energy',  # current energy level
-        '/release', 'release')  # win
+        '/release', 'release', #win
+        '/admin', 'admin', #SC administration panel
+        '/testRelease', 'testRelease',
+        '/testStun', 'testStun',
+        '/setPuzzleNum', 'setPuzzleNum',
+        '/setStunTime', 'setStunTime',
+        '/setReleaseTime', 'setReleaseTime',
+        '/setEnergyLevel', 'setEnergyLevel')
 app = web.application(urls, globals())
 session = web.session.Session(app, web.session.DiskStore('sessions'))
 
 
-def init_leds():
-    t = 5
+def init_leds(t=5):
     while t:
         GPIO.output(RED, True)
         time.sleep(.25)
@@ -99,12 +111,12 @@ def init_leds():
     GPIO.output(RED, False)
 
 
-def flaglights():
+def releaseLights():
     global STUNNED
     global STUNTIME
 
     STUNNED = True
-    STUNTIME = FLAGDURATION
+    STUNTIME = RELEASEDURATION
     threading.Thread(target=countdown).start()
     now = time.time()
     # Turn off the lights
@@ -112,7 +124,7 @@ def flaglights():
         GPIO.output(RED, False)
         GPIO.output(GREEN, False)
         GPIO.output(BLUE, False)
-    while(time.time() < now + FLAGDURATION and STUNNED):
+    while(time.time() < now + RELEASEDURATION and STUNNED):
         if DEBUG and NOGPIO:
             print "WIN!"
             time.sleep(.6)
@@ -156,7 +168,7 @@ def countdown():
         time.sleep(1)
 
 
-def stunlights():
+def stunLights():
     global STUNNED
     global STUNTIME
     now = time.time()
@@ -240,13 +252,153 @@ class release:
         if DEBUG:
             print "Color is now", COLOR
 
-        threading.Thread(target=flaglights).start()
+        threading.Thread(target=releaseLights).start()
 
         db[user]["solved"] = True
         sync_db()
 
         return render.release(SHADOWCASTER, db[user]["flag"])
 
+#ADMIN FUNCTIONS
+puzzlenumForm = form.Form(
+    form.Dropdown('mydrop', zip(range(1, TOTALPUZZLES+1), range(1, TOTALPUZZLES+1)), style="font-family: Quantico; font-size: 30px;"),
+    form.Button("Change",
+                description="Change",
+                style="font-family: Quantico; font-size: 30px;"))
+
+testReleaseForm = form.Form(
+    form.Button("Test LEDs",
+                description="",
+                style="font-family: Quantico; font-size: 30px; align: center;"))
+
+testStunForm = form.Form(
+    form.Button("Test LEDs",
+                description="",
+                style="font-family: Quantico; font-size: 30px; align: center;"))
+
+setStunTimeForm = form.Form(
+    form.Textbox("time",
+                form.notnull,
+                form.regexp('^-?\d+$', 'Not a number.'),
+                size="12",
+                maxlength="4",
+                width="12",
+                description=""),
+    form.Button("Change",
+                description="Change",
+                style="font-family: Quantico; font-size: 30px;")
+)
+setReleaseTimeForm = form.Form(
+    form.Textbox("time",
+                form.notnull,
+                form.regexp('^-?\d+$', 'Not a number.'),
+                size="12",
+                maxlength="4",
+                width="12",
+                description=""),
+    form.Button("Change",
+                description="Change",
+                style="font-family: Quantico; font-size: 30px;")
+)
+
+setEnergyLevelForm = form.Form(
+    form.Textbox("level",
+                form.notnull,
+                form.regexp('^-?\d+$', 'Not a number.'),
+                size="12",
+                maxlength="4",
+                width="12",
+                description=""),
+    form.Button("Change",
+                description="Change",
+                style="font-family: Quantico; font-size: 30px;")
+)
+
+class testRelease:
+    def GET(self):
+        threading.Thread(target=releaseLights).start()
+        raise web.seeother('/admin')
+    def POST(self):
+        threading.Thread(target=releaseLights).start()
+        raise web.seeother('/admin')
+
+class testStun:
+    def GET(self):
+        threading.Thread(target=stunLights).start()
+        raise web.seeother('/admin')
+    def POST(self):
+        threading.Thread(target=stunLights).start()
+        raise web.seeother('/admin')
+
+class setPuzzleNum:
+    def POST(self):
+        global SHADOWCASTER
+
+        form = puzzlenumForm()
+
+        if not form.validates():
+            raise web.seeother('/admin?status=Bad puzzle number')
+            #return render.admin(SHADOWCASTER, puzzlenumForm, testLightsForm, setStunTimeForm, COLOR, "ERROR")
+        SHADOWCASTER =  int(form["mydrop"].value)
+        config["SHADOWCASTER"] = SHADOWCASTER
+        with open("scconfig.json", "w") as f:
+            f.write(json.dumps(config))
+            f.close()
+        raise web.seeother('/admin?status=Success')
+
+class setStunTime:
+    def POST(self):
+        global STUNDURATION
+        form = setStunTimeForm()
+        if not form.validates():
+            raise web.seeother('/admin?status=Not a number')
+            #return render.admin(SHADOWCASTER, puzzlenumForm, testLightsForm, setStunTimeForm, COLOR, "ERROR: Not a number.")
+        STUNDURATION = int(form["time"].value)
+        config["STUNDURATION"] = STUNDURATION
+        with open("scconfig.json", "w") as f:
+            f.write(json.dumps(config))
+            f.close()
+        raise web.seeother('/admin?status=Success')
+
+class setReleaseTime:
+    def POST(self):
+        global RELEASEDURATION
+        form = setReleaseTimeForm()
+        if not form.validates():
+            raise web.seeother('/admin?status=Not a number')
+            #return render.admin(SHADOWCASTER, puzzlenumForm, testLightsForm, setStunTimeForm, COLOR, "ERROR: Not a number.")
+        RELEASEDURATION = int(form["time"].value)
+        config["RELEASEDURATION"] = RELEASEDURATION
+        with open("scconfig.json", "w") as f:
+            f.write(json.dumps(config))
+            f.close()
+        raise web.seeother('/admin?status=Success')
+
+class setEnergyLevel:
+    def POST(self):
+        global ENERGY
+        form = setEnergyLevelForm()
+        if not form.validates():
+            raise web.seeother('/admin?status=Not a number')
+            #return render.admin(SHADOWCASTER, puzzlenumForm, testLightsForm, setStunTimeForm, COLOR, "ERROR: Not a number.")
+        ENERGY = int(form["level"].value)
+        config["ENERGY"] = ENERGY
+        with open("scconfig.json", "w") as f:
+            f.write(json.dumps(config))
+            f.close()
+        raise web.seeother('/admin?status=Success')
+    
+
+class admin:
+
+    def GET(self):
+        data = web.input(status="")
+        status = str(data.status)
+        puzzlenumForm["mydrop"].value = str(SHADOWCASTER)
+        setStunTimeForm["time"].value = str(STUNDURATION)
+        setReleaseTimeForm["time"].value = str(RELEASEDURATION)
+        setEnergyLevelForm["level"].value = str(ENERGY)
+        return render.admin(SHADOWCASTER, puzzlenumForm, setEnergyLevelForm, setStunTimeForm, setReleaseTimeForm, testReleaseForm, testStunForm, COLOR, status)
 
 class login:
     global db
@@ -271,7 +423,7 @@ class login:
 
         # If we have a logged in user, redirect them to the puzzle
         if session.get('logged_in'):
-            raise web.seeother('/admin')
+            raise web.seeother('/sc')
 
         # else, have them login
         return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "")
@@ -294,7 +446,7 @@ class login:
         session.logged_in = True
         session.user = user
 
-        raise web.seeother('/admin')
+        raise web.seeother('/sc')
 
 
 class logout:
@@ -311,7 +463,7 @@ class logout:
         raise web.seeother('/login')
 
 
-class admin:
+class sc:
     global db
     global STUNNED
     global ENERGY
@@ -325,6 +477,8 @@ class admin:
         user = session.get('user')
         if db[user]["solved"]:
             return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
+
+        print "SC", SHADOWCASTER
 
         if SHADOWCASTER == 1:
             return render.intswitch(STUNTIME)
@@ -350,8 +504,11 @@ class admin:
 
 class stun:
     def GET(self):
-        threading.Thread(target=stunlights).start()
+        threading.Thread(target=stunLights).start()
         return "Stunned!"
+    def POST(self):
+        threading.Thread(target=stunLights).start()
+        web.seeother('/admin')
 
 
 class unstun:
@@ -361,6 +518,12 @@ class unstun:
         STUNNED = False
         STUNTIME = 0
         return "Unstunned!"
+    def POST(self):
+        global STUNNED
+        global STUNTIME
+        STUNNED = False
+        STUNTIME = 0
+        web.seeother('/admin')
 
 
 class stunstatus:
