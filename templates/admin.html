@@ -1,0 +1,101 @@
+$def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, setReleaseTimeForm, testReleaseForm, testStunForm, color, status)
+
+<html>
+	<head><title>shadowCaster admin</title>
+		<link href='/static/font.css' rel='stylesheet'>
+		<style>
+			.concernForm {
+				text-align: center;
+				color: rgb(255, 255, 255);
+				font-size: 30px;
+				font-family: 'Quantico'
+			}
+			.concern{
+				text-align: center;
+				color: rgb(255, 255, 255);
+				font-size: 40px;
+				font-family: 'Quantico'
+			}
+			input {
+                vertical-align: middle;
+                text-align: center;
+                height: 40px;
+				font-size: 20px;
+				font-family: 'Quantico'  
+			 }
+		</style>
+		
+	</head>
+	<body bgcolor="black">
+		<center>
+
+            <div class="concern"><font color="red"> shadowCaster $(puzzlenumber) administration</font></div>
+            <img id="logo" width=300 src="/static/$(color).png">
+            $if status != "":
+                <p><div class="concern"> $status </div></p>
+            <table border=2>
+                <tr>
+                    <td width=300 align=center>
+                        <div class='concernForm'><b>Change SC #:<b></div>
+                        <form action="/setPuzzleNum" name="puzzleNum" method="post">
+                            $if puzzlenumberform:
+                                <center>
+                                $:puzzlenumberform.render()
+                                </center>
+                            
+                        </form>
+                    </td>
+                    <td width=300 align=center>
+                        <form action="/setEnergyLevel" name="setEnergyLevel" method="post">
+                            <div class='concernForm'><b>Set Energy Level:<b></div> 
+                            $if setEnergyLevelForm: 
+                                $:setEnergyLevelForm.render()
+
+                        </form>
+                    </td>
+                    <td width=300 align=center>
+                        <form action="/setStunTime" name="setStunTime" method="post">
+                            <div class='concernForm'><b>Set Stun Time<br>(in seconds):<b></div> 
+                            $if setStunTimeForm: 
+                                $:setStunTimeForm.render()
+
+                        </form>
+                    </td>
+                    <td width=300 align=center>
+                        <form action="/setReleaseTime" name="setReleaseTime" method="post">
+                            <div class='concernForm'><b>Set Release Time<br>(in seconds):<b></div> 
+                            $if setReleaseTimeForm: 
+                                $:setReleaseTimeForm.render()
+
+                        </form>
+                    </td>
+                </tr>
+
+            </table>
+            <table border=2>
+                <tr>
+                    <td width=300>
+                        <form action="/testRelease" name="testRelease" method="post">
+                            <div class='concernForm'><b>Test LED Release:<b></div> 
+                            $if testReleaseForm:
+                                <center>
+                                $:testReleaseForm.render()
+                                </center>
+
+                        </form>
+                    </td>
+                    <td width=300>
+                            <form action="/testStun" name="testStun" method="post">
+                                <div class='concernForm'><b>Test LED Stun:<b></div> 
+                                $if testStunForm:
+                                    <center>
+                                    $:testStunForm.render()
+                                    </center>
+    
+                            </form>
+                        </td>
+                </tr>
+            </table>
+        </center>
+	</body>
+</html>
