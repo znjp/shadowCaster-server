@@ -1,8 +1,8 @@
 
 
-#TODO
+# TODO
 
-##High Priority
+## High Priority
 1. Refactor JS code to have a shadowcaster library
 
 2. <strike>Simon: touch feedback</strike>
@@ -13,7 +13,7 @@
 
 5. New puzzles
 
-###Low to Medium Priority
+### Low to Medium Priority
 - Shorter flags, in case copy and paste doesn't work
 
 - Reveal flag on "youve already released this flag" page
@@ -22,15 +22,15 @@
 
 - More points for early solves
 
-####To Categorize
-#####Admin Interface for SC
+#### To Categorize
+##### Admin Interface for SC
  - Create a web interface for changing the shadowcaster puzzle number
  - Adjust the energy levels
  - Stun and flag duration
  - test LEDs; Get GPIO status
  - Add/remove teams; change password
 
-#####Real DB integration
+##### Real DB integration
  - admin teams
 
 
