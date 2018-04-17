@@ -1,9 +1,9 @@
 var goal = Math.round(Math.random() * 204) + 51;
 
 //document.getElementById('mainHeading').innerHTML = 'Please Convert ' + goal + ' from Decimal to Binary';
-if (game == "int"){
+if (game == "int") {
   document.getElementById('mainHeading').innerHTML = goal;
-}else if (game == "hex"){
+} else if (game == "hex") {
   document.getElementById('mainHeading').innerHTML = "0x" + goal.toString(16);
 }
 //get window size
@@ -54,9 +54,9 @@ function draw() {
     }
   }
   if (currentNum == goal) {
-    if (game == "int"){
+    if (game == "int") {
       document.location = "/release?e=3b10e318779364e186c2fe7b7f8e07e40bf9eaf5"
-    }else if(game == "hex"){
+    } else if (game == "hex") {
       document.location = "/release?e=587db024ee9e68fbeee8c799a2ce0c142ae67597"
     }
   }
