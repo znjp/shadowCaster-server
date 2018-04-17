@@ -22,6 +22,8 @@
 
 - More points for early solves
 
+- Refactor to remove JavaScript processing
+
 #### To Categorize
 ##### Admin Interface for SC
  - Create a web interface for changing the shadowcaster puzzle number
