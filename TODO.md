@@ -11,7 +11,9 @@
 
 4. <strike>Switches: Make them circles</strike>
 
-5. New puzzles
+5. fix 9
+
+6. New puzzles
 
 ### Low to Medium Priority
 - Shorter flags, in case copy and paste doesn't work
