@@ -48,7 +48,7 @@ function toggle(binNum) {
     $('#bin' + binNum + '.counter').html('0')
   }
   currentNum = boolArrayToDec(switches)
-  if (currentNum == goal1 ^ goal2 | ~goal3 & 255) {
+  if (currentNum == (goal1 ^ goal2 | ~goal3 & 255)) {
     document.location = "/release?e=14265e37fd16904ee3d4a306ff25016de9181eb8";
   }
 }
