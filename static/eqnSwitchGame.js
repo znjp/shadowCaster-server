@@ -5,7 +5,7 @@ var goal3 = Math.round(Math.random() * 204) + 51;
 document.getElementById('mainHeading').innerHTML = goal1 + " ^ 0" + goal2.toString(8) + ' | ~0x' + goal3.toString(16) + ' & 0b11111111';
 
 var goal = Math.round(Math.random() * 204) + 51;
-document.getElementById('mainHeading').innerHTML = 'Please Convert ' + goal + ' from Decimal to Binary';
+$('#mainHeading').innerHTML = 'Please Convert ' + goal + ' from Decimal to Binary';
 
 switches = [];
 for (var i = 0; i < 8; i++) {
@@ -38,21 +38,19 @@ document.getElementById("7").onclick = function () {
 };
 
 function toggle(binNum) {
-  var btn = document.getElementById(binNum)
-  if (switches[binNum]) {
-    document.getElementById('bin' + binNum).innerHTML = '0'
-    addClass(btn, 'off')
-    removeClass(btn, 'on')
-  } else {
-    document.getElementById('bin' + binNum).innerHTML = '1'
-    addClass(btn, 'on')
-    removeClass(btn, 'off')
-  }
+  var btn = $('#' + binNum)
+  btn.toggleClass('on')
+  btn.toggleClass('off')
   switches[binNum] = !switches[binNum]
-  document.getElementById('currentNum').innerHTML = boolArrayToDec(switches)
-  if (currentNum == (goal1 ^ goal2 | ~goal3 & 255)) {
-    document.location = "/release?e=14265e37fd16904ee3d4a306ff25016de9181eb8";
+  if ($('#bin' + binNum + '.counter').html() == '0') {
+    $('#bin' + binNum + '.counter').html('1')
+  } else {
+    $('#bin' + binNum + '.counter').html('0')
   }
+  // document.getElementById('currentNum').innerHTML = boolArrayToDec(switches)
+  // if (currentNum == goal1 ^ goal2 | ~goal3 & 255) {
+  //   document.location = "/release?e=14265e37fd16904ee3d4a306ff25016de9181eb8";
+  // }
 }
 
 function boolArrayToDec(array) {
