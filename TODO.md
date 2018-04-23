@@ -11,14 +11,14 @@
 
 4. <strike>Switches: Make them circles</strike>
 
-5. fix 9
+5. <strike>fix 9</strike>
 
 6. New puzzles
 
 ### Low to Medium Priority
 - Shorter flags, in case copy and paste doesn't work
 
-- Reveal flag on "youve already released this flag" page
+- Reveal flag on "you've already released this flag" page
 
 - User Notifications (SA is near)
 
