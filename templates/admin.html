@@ -1,7 +1,7 @@
 $def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, setReleaseTimeForm, testReleaseForm, testStunForm, color, status)
 
 <html>
-	<head><title>shadowCaster admin</title>
+	<head><title>ShadowCaster Admin</title>
 		<link href='/static/font.css' rel='stylesheet'>
 		<style>
 			.concernForm {
@@ -21,10 +21,10 @@ $def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, 
                 text-align: center;
                 height: 40px;
 				font-size: 20px;
-				font-family: 'Quantico'  
+				font-family: 'Quantico'
 			 }
 		</style>
-		
+
 	</head>
 	<body bgcolor="black">
 		<center>
@@ -42,29 +42,29 @@ $def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, 
                                 <center>
                                 $:puzzlenumberform.render()
                                 </center>
-                            
+
                         </form>
                     </td>
                     <td width=300 align=center>
                         <form action="/setEnergyLevel" name="setEnergyLevel" method="post">
-                            <div class='concernForm'><b>Set Energy Level:<b></div> 
-                            $if setEnergyLevelForm: 
+                            <div class='concernForm'><b>Set Energy Level:<b></div>
+                            $if setEnergyLevelForm:
                                 $:setEnergyLevelForm.render()
 
                         </form>
                     </td>
                     <td width=300 align=center>
                         <form action="/setStunTime" name="setStunTime" method="post">
-                            <div class='concernForm'><b>Set Stun Time<br>(in seconds):<b></div> 
-                            $if setStunTimeForm: 
+                            <div class='concernForm'><b>Set Stun Time<br>(in seconds):<b></div>
+                            $if setStunTimeForm:
                                 $:setStunTimeForm.render()
 
                         </form>
                     </td>
                     <td width=300 align=center>
                         <form action="/setReleaseTime" name="setReleaseTime" method="post">
-                            <div class='concernForm'><b>Set Release Time<br>(in seconds):<b></div> 
-                            $if setReleaseTimeForm: 
+                            <div class='concernForm'><b>Set Release Time<br>(in seconds):<b></div>
+                            $if setReleaseTimeForm:
                                 $:setReleaseTimeForm.render()
 
                         </form>
@@ -76,7 +76,7 @@ $def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, 
                 <tr>
                     <td width=300>
                         <form action="/testRelease" name="testRelease" method="post">
-                            <div class='concernForm'><b>Test LED Release:<b></div> 
+                            <div class='concernForm'><b>Test LED Release:<b></div>
                             $if testReleaseForm:
                                 <center>
                                 $:testReleaseForm.render()
@@ -86,12 +86,12 @@ $def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, 
                     </td>
                     <td width=300>
                             <form action="/testStun" name="testStun" method="post">
-                                <div class='concernForm'><b>Test LED Stun:<b></div> 
+                                <div class='concernForm'><b>Test LED Stun:<b></div>
                                 $if testStunForm:
                                     <center>
                                     $:testStunForm.render()
                                     </center>
-    
+
                             </form>
                         </td>
                 </tr>

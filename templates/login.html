@@ -1,7 +1,7 @@
 $def with (form, stunned, num, color, error)
 
 <html>
-	<head><title>shadowCaster login</title>
+	<head><title>ShadowCaster Login</title>
 		<link href='/static/font.css' rel='stylesheet'>
 		<style>
 			.concernForm {
@@ -20,7 +20,7 @@ $def with (form, stunned, num, color, error)
    				width: 500px;
 				height: 40px;
 				font-size: 20px;
-				font-family: 'Quantico'  
+				font-family: 'Quantico'
 			 }
 		</style>
 		<script type="text/javascript">
@@ -48,8 +48,8 @@ $def with (form, stunned, num, color, error)
 				oReq.addEventListener("load", stunReqListener);
 				oReq.open("GET", "/stunstatus");
 				oReq.send();
-			}	
-			
+			}
+
 		</script>
 	</head>
 	<body bgcolor="black">
@@ -60,7 +60,7 @@ $def with (form, stunned, num, color, error)
 			<script src="/static/timer.js"></script>
 			<script>
 				setTimer(document.getElementById("timer"), $(stunned) );
-				setTimeout(function(){window.location.reload(1);}, 5000);			
+				setTimeout(function(){window.location.reload(1);}, 5000);
 			</script>
 		$else:
 			<script>setInterval(makeStunRequest, 5000);</script>

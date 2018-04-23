@@ -1,6 +1,6 @@
 $def with (stunned)
 <html>
-	<head><title>shadowCaster admin</title>
+	<head><title>Debugging 2</title>
 		<link href='/static/font.css' rel='stylesheet'>
 		<style>
 				.concern {
@@ -39,8 +39,8 @@ $def with (stunned)
 				oReq.addEventListener("load", stunReqListener);
 				oReq.open("GET", "/stunstatus");
 				oReq.send();
-			}	
-			
+			}
+
 		</script>
 	</head>
 	<body bgcolor="black">
@@ -51,7 +51,7 @@ $def with (stunned)
 			<script src="/static/timer.js"></script>
 			<script>
 				setTimer(document.getElementById("timer"), $(stunned) );
-				setTimeout(function(){window.location.reload(1);}, 5000);			
+				setTimeout(function(){window.location.reload(1);}, 5000);
 			</script>
 		$else:
 			<script>setInterval(makeStunRequest, 5000);</script>
@@ -62,7 +62,7 @@ $def with (stunned)
 			<script src="/static/p5.js"></script>
 			<script>var game = "two";</script>
 			<script src="/static/dragDropGame.js"></script>
-				
+
 		</center>
 
 	</body>
