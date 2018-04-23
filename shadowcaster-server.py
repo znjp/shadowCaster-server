@@ -571,6 +571,10 @@ def init_users():
                    "flag": hashlib.sha1("india" + "sc" + str(SHADOWCASTER)).hexdigest()}
     db["juliet"] = {"password": "gKZFQr", "solved": False,
                     "flag": hashlib.sha1("juliet" + "sc" + str(SHADOWCASTER)).hexdigest()}
+    db["1"] = {"password": "1", "solved": False,
+               "flag": hashlib.sha1("1" + "sc" + str(SHADOWCASTER)).hexdigest()}
+    db["2"] = {"password": "2", "solved": False,
+               "flag": hashlib.sha1("2" + "sc" + str(SHADOWCASTER)).hexdigest()}
     sync_db()
     return
 
