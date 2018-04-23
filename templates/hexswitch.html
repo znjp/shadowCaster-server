@@ -1,6 +1,6 @@
 $def with (stunned)
 <html>
-	<head><title>shadowCaster admin</title>
+	<head><title>Hex Switches</title>
 		<link href='/static/font.css' rel='stylesheet'>
 		<style>
 				.concern {
@@ -39,7 +39,7 @@ $def with (stunned)
 				oReq.addEventListener("load", stunReqListener);
 				oReq.open("GET", "/stunstatus");
 				oReq.send();
-			}	
+			}
 		</script>
 	</head>
 	<body bgcolor="black">
@@ -50,18 +50,57 @@ $def with (stunned)
 			<script src="/static/timer.js"></script>
 			<script>
 				setTimer(document.getElementById("timer"), $(stunned) );
-				setTimeout(function(){window.location.reload(1);}, 5000);			
+				setTimeout(function(){window.location.reload(1);}, 5000);
 			</script>
 		$else:
 			<script>setInterval(makeStunRequest, 5000);</script>
 			<div id="gameArea">
 				<h4 id="currentNum"><!-- 0 --></h4>
 				<div class="concern"><h3 id='mainHeading'><!-- Please Convert from Decimal to Binary --></h3></div>
+        <table class='game'>
+          <tr>
+            <td id='bin0' class='counter'>0</td>
+            <td id='bin1' class='counter'>0</td>
+            <td id='bin2' class='counter'>0</td>
+            <td id='bin3' class='counter'>0</td>
+            <td id='bin4' class='counter'>0</td>
+            <td id='bin5' class='counter'>0</td>
+            <td id='bin6' class='counter'>0</td>
+            <td id='bin7' class='counter'>0</td>
+          </tr>
+          <tr>
+            <td id='0' class='off toggle'>
+              <div></div>
+            </td>
+            <td id='1' class='off toggle'>
+              <div></div>
+            </td>
+            <td id='2' class='off toggle'>
+              <div></div>
+            </td>
+            <td id='3' class='off toggle'>
+              <div></div>
+            </td>
+            <td id='4' class='off toggle'>
+              <div></div>
+            </td>
+            <td id='5' class='off toggle'>
+              <div></div>
+            </td>
+            <td id='6' class='off toggle'>
+              <div></div>
+            </td>
+            <td id='7' class='off toggle'>
+              <div></div>
+            </td>
+          </tr>
+          <table>
 			</div>
 			<script src="/static/p5.js"></script>
 			<script>var game = "hex";</script>
+      <script src='/static/jquery-2.2.4.min.js'></script>
 			<script src="/static/switchGame.js"></script>
-				
+
 		</center>
 
 	</body>
