@@ -1,3 +1,40 @@
+switches = [];
+for (var i = 0; i < 8; i++) {
+  switches.push(false);
+}
+
+function toggle(binNum) {
+  var btn = $('#' + binNum)
+  btn.toggleClass('on')
+  btn.toggleClass('off')
+  switches[binNum] = !switches[binNum];
+}
+
+document.getElementById("0").onclick = function () {
+  toggle(0)
+};
+document.getElementById("1").onclick = function () {
+  toggle(1)
+};
+document.getElementById("2").onclick = function () {
+  toggle(2)
+};
+document.getElementById("3").onclick = function () {
+  toggle(3)
+};
+document.getElementById("4").onclick = function () {
+  toggle(4)
+};
+document.getElementById("5").onclick = function () {
+  toggle(5)
+};
+document.getElementById("6").onclick = function () {
+  toggle(6)
+};
+document.getElementById("7").onclick = function () {
+  toggle(7)
+};
+
 var windowWidth = window.innerWidth ||
   document.documentElement.clientWidth ||
   document.body.clientWidth;
@@ -23,10 +60,6 @@ function setup() {
   //var canvas = createCanvas(windowWidth * 0.8, windowHeight * 0.8);
   canvas.parent('gameArea');
   frameRate(20); //sets rate of draw to 20 calls per second instead of 60
-  switches = [];
-  for (var i = 0; i < 8; i++) {
-    switches.push(false);
-  }
   background(0);
 }
 
@@ -39,6 +72,9 @@ function draw() {
   var gh = !(switches[6] ^ switches[7])
   var efgh = !(ef || gh)
   var abcdefgh = abcd && efgh
+  push();
+  translate(0, -height * 11 / 67);
+  scale(1, 1.196)
   if (abcdefgh) {
     drawLines(ab, cd, ef, gh, abcd, efgh, abcdefgh);
     drawGates(ab, cd, ef, gh, abcd, efgh, abcdefgh);
@@ -47,16 +83,7 @@ function draw() {
     drawLines(false, false, false, false, false, false, false);
     drawGates(false, false, false, false, false, false, false);
   }
-  drawSwitches();
-}
-
-function drawSwitches() {
-  var xPos = width / 9;
-  var yPos = height * 11 / 67;
-  for (var i = 0; i < switches.length; i++) {
-    drawSwitch(xPos, yPos, switches[i]);
-    xPos += width / 9;
-  }
+  pop();
 }
 
 function drawLines(bool, bool1, bool2, bool3, bool4, bool5, bool6) {
@@ -71,6 +98,7 @@ function drawLines(bool, bool1, bool2, bool3, bool4, bool5, bool6) {
     }
     strokeJoin(MITER);
     beginShape();
+    noFill();
     vertex(xPos, (12 / 67) * height);
     vertex(xPos, (1 / 3) * height);
     if (i % 2 === 0) {
@@ -158,37 +186,6 @@ function drawLines(bool, bool1, bool2, bool3, bool4, bool5, bool6) {
   line(width / 2, (1 / 3 + (2 / 3) * (2 / 4) + 1 / 32) * height, width / 2, (1 / 3 + (2 / 3) * (3 / 4) + 1 / 32) * height)
 }
 
-function drawSwitch(x, y, boolean) {
-  push();
-  translate(x, y);
-  scale(1, 3 / 16);
-  fill(245);
-  noStroke();
-  fill(clrBoolean(boolean))
-  rect(-width / 36, 0, width / 18, height / 4);
-  stroke(245);
-  strokeWeight(5);
-  arc(0, 0, width / 18, height / 8, PI, 2 * PI);
-  arc(0, height / 4, width / 18, height / 8, 0, PI);
-  line(-width / 36 - 0.5, 0, -width / 36 - 0.5, height / 4);
-  line(width / 36 - 0.5, 0, width / 36 - 0.5, height / 4);
-  pop();
-}
-
-function touchStarted() {
-  console.log('x: ' + mouseX);
-  console.log('width: ' + width);
-  // console.log('y: ' + mouseY);
-  // console.log('height: ' + height);
-  if (mouseY > height * 11 / 67 && mouseY < height * 553 / 2144) {
-    for (var i = 0; i < switches.length; i++) {
-      if (mouseX > width * ((1 + i) / 9) - (1 / 36) * width && mouseX < width * ((1 + i) / 9) + (1 / 36) * width) {
-        console.log('x true');
-        switches[i] = !switches[i];
-      }
-    }
-  }
-}
 
 function checkLogic() {
   var ab = switches[0] && switches[1]
@@ -220,7 +217,7 @@ function drawGate(label, x, y, boolean) {
     rect(-width * 3 / 36, 0, width * 3 / 18, height / 16);
     fill(255)
     textFont('Quantico');
-    textAlign(CENTER,CENTER);
+    textAlign(CENTER, CENTER);
     text('releaseLight()', -width * 3 / 36, 0, width * 3 / 18, height / 16);
   }
 
