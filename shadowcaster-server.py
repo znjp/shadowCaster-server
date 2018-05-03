@@ -1,7 +1,7 @@
 # import sys
 import web
 import hashlib
-# import os
+import os
 import random
 import string
 import time
@@ -583,9 +583,12 @@ def load_db(db_path):
     global db
     # Load any saved progress
     try:
-        f = open(db_path)
-        db = pickle.load(f)
-        f.close()
+        # f = open(db_path)
+        # db = pickle.load(f)
+        # f.close()
+        # Saved progress is overated
+        os.remove(db_path)
+        init_users()
         if DEBUG:
             print "LOAD DB", db
     except:
@@ -593,6 +596,9 @@ def load_db(db_path):
             print "Error loading database. Creating a new one."
         init_users()
         return
+
+    # Saved progress is overated
+    # init_users()
 
 
 def sync_db():
