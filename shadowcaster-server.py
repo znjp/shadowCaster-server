@@ -550,31 +550,31 @@ def init_users():
     global db
     # Generate user logins and flags
     db["znjp"] = {"password": "brak4pres", "solved": False,
-                  "flag": hashlib.sha1("znjp" + "sc" + str(SHADOWCASTER)).hexdigest()}
+                  "flag": hashlib.sha1("znjp" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": True}
     db["alpha"] = {"password": "ZnTkHA", "solved": False,
-                   "flag": hashlib.sha1("alpha" + "sc" + str(SHADOWCASTER)).hexdigest()}
+                   "flag": hashlib.sha1("alpha" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["bravo"] = {"password": "dTdRtLY", "solved": False,
-                   "flag": hashlib.sha1("bravo" + "sc" + str(SHADOWCASTER)).hexdigest()}
+                   "flag": hashlib.sha1("bravo" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["charlie"] = {"password": "dZUokZ", "solved": False, "flag": hashlib.sha1(
-        "charlie" + "sc" + str(SHADOWCASTER)).hexdigest()}
+        "charlie" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["delta"] = {"password": "HewLwZ", "solved": False,
-                   "flag": hashlib.sha1("delta" + "sc" + str(SHADOWCASTER)).hexdigest()}
+                   "flag": hashlib.sha1("delta" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["echo"] = {"password": "pRhzpa", "solved": False,
-                  "flag": hashlib.sha1("echo" + "sc" + str(SHADOWCASTER)).hexdigest()}
+                  "flag": hashlib.sha1("echo" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["foxtrot"] = {"password": "djUTAm", "solved": False, "flag": hashlib.sha1(
-        "foxtrot" + "sc" + str(SHADOWCASTER)).hexdigest()}
+        "foxtrot" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["golf"] = {"password": "DMTBQa", "solved": False,
-                  "flag": hashlib.sha1("golf" + "sc" + str(SHADOWCASTER)).hexdigest()}
+                  "flag": hashlib.sha1("golf" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["hotel"] = {"password": "xokRDs", "solved": False,
-                   "flag": hashlib.sha1("hotel" + "sc" + str(SHADOWCASTER)).hexdigest()}
+                   "flag": hashlib.sha1("hotel" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["india"] = {"password": "PZEUXn", "solved": False,
-                   "flag": hashlib.sha1("india" + "sc" + str(SHADOWCASTER)).hexdigest()}
+                   "flag": hashlib.sha1("india" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["juliet"] = {"password": "gKZFQr", "solved": False,
-                    "flag": hashlib.sha1("juliet" + "sc" + str(SHADOWCASTER)).hexdigest()}
+                    "flag": hashlib.sha1("juliet" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["1"] = {"password": "1", "solved": False,
-               "flag": hashlib.sha1("1" + "sc" + str(SHADOWCASTER)).hexdigest()}
+               "flag": hashlib.sha1("1" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     db["2"] = {"password": "2", "solved": False,
-               "flag": hashlib.sha1("2" + "sc" + str(SHADOWCASTER)).hexdigest()}
+               "flag": hashlib.sha1("2" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
     sync_db()
     return
 
