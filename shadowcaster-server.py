@@ -11,6 +11,24 @@ import threading
 import signal
 import json
 
+# the StoppableThread class is from https://stackoverflow.com/questions/323972/is-there-any-way-to-kill-a-thread-in-python
+
+
+class StoppableThread(threading.Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
+
+    def __init__(self):
+        super(StoppableThread, self).__init__()
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
+
+
 # This line causes this script to be somewhat unresponsive to ctrl-C
 web.config.debug = False
 DEBUG = True
@@ -554,31 +572,31 @@ def init_users():
     global db
     # Generate user logins and flags
     config["TOTALPUZZLES"]
-    db["znjp"] = {"password": "brak4pres", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["znjp"] = {"password": "brak4pres", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'znjp'), "admin": True}
-    db["alpha"] = {"password": "ZnTkHA", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["alpha"] = {"password": "ZnTkHA", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                    "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'aplha'), "admin": False}
-    db["bravo"] = {"password": "dTdRtLY", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["bravo"] = {"password": "dTdRtLY", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                    "flag": hashlib.sha1("bravo" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
-    db["charlie"] = {"password": "dZUokZ", "solved": db_build_helper(
+    db["charlie"] = {"password": "dZUokZ", "solved": db_build_helper_for_solved_status(
         config["TOTALPUZZLES"]), "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'charlie'), "admin": False}
-    db["delta"] = {"password": "HewLwZ", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["delta"] = {"password": "HewLwZ", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                    "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'delta'), "admin": False}
-    db["echo"] = {"password": "pRhzpa", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["echo"] = {"password": "pRhzpa", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'echo'), "admin": False}
-    db["foxtrot"] = {"password": "djUTAm", "solved": db_build_helper(
+    db["foxtrot"] = {"password": "djUTAm", "solved": db_build_helper_for_solved_status(
         config["TOTALPUZZLES"]), "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'foxtrot'), "admin": False}
-    db["golf"] = {"password": "DMTBQa", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["golf"] = {"password": "DMTBQa", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'golf'), "admin": False}
-    db["hotel"] = {"password": "xokRDs", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["hotel"] = {"password": "xokRDs", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                    "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'hotel'), "admin": False}
-    db["india"] = {"password": "PZEUXn", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["india"] = {"password": "PZEUXn", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                    "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'india'), "admin": False}
-    db["juliet"] = {"password": "gKZFQr", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["juliet"] = {"password": "gKZFQr", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                     "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'juliet'), "admin": False}
-    db["1"] = {"password": "1", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["1"] = {"password": "1", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], '1'), "admin": False}
-    db["2"] = {"password": "2", "solved": db_build_helper(config["TOTALPUZZLES"]),
+    db["2"] = {"password": "2", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
                "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], '2'), "admin": False}
     sync_db()
     return
