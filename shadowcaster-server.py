@@ -11,6 +11,7 @@ import threading
 import signal
 import json
 
+
 # This line causes this script to be somewhat unresponsive to ctrl-C
 web.config.debug = False
 DEBUG = True
@@ -518,6 +519,8 @@ class sc:
             return render.sc8(STUNTIME)
         elif SHADOWCASTER == 9:
             return render.eqnswitch(STUNTIME)
+        elif SHADOWCASTER == 10:
+            return render.picture(STUNTIME)
 
         return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "error: no puzzle")
 
