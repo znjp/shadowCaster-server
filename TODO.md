@@ -26,6 +26,8 @@
 
 - Refactor to remove JavaScript processing
 
+- I solved SC5, then visited SC6 and it said it had already been solved. Look into this.
+
 #### To Categorize
 ##### Admin Interface for SC
  - Create a web interface for changing the shadowcaster puzzle number
