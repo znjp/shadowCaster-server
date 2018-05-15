@@ -1,7 +1,7 @@
 # import sys
 import web
 import hashlib
-# import os
+import os
 import random
 import string
 import time
@@ -11,7 +11,9 @@ import threading
 import signal
 import json
 
-web.config.debug = False  # This line causes this script to be somewhat unresponsive to ctrl-C
+
+# This line causes this script to be somewhat unresponsive to ctrl-C
+web.config.debug = False
 DEBUG = True
 
 # SHADOWCASTER GLOBAL SETTINGS
@@ -54,12 +56,14 @@ try:
     GPIO.output(BLUE, True)
     NOGPIO = False
 except:
-    print time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + " No GPIO. Going to DEBUG mode."
+    print time.strftime("%a, %d %b %Y %H:%M:%S",
+                        time.localtime()) + " No GPIO. Going to DEBUG mode."
     NOGPIO = True
 
 
 # Our "database"
 db = {}
+# db = web.database(dbn='postgres', usr='username', pw='password', db='dbname')
 last_sync = 0
 
 render = web.template.render('templates/')
@@ -231,7 +235,8 @@ class release:
             raise web.seeother('/login')
 
         user = session.get('user')
-        if db[user]["solved"]:
+        # if db[user]["solved"]:
+        if db[user]["solved"][str(config["SHADOWCASTER"])]:
             return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
 
         # Get solved key and validate
@@ -255,10 +260,10 @@ class release:
 
         threading.Thread(target=releaseLights).start()
 
-        db[user]["solved"] = True
+        db[user]["solved"][str(config["SHADOWCASTER"])] = True
         sync_db()
 
-        return render.release(SHADOWCASTER, db[user]["flag"])
+        return render.release(SHADOWCASTER, db[user]["flag"][str(config["SHADOWCASTER"])])
 
 
 # ADMIN FUNCTIONS
@@ -341,6 +346,8 @@ class testStun:
 class setPuzzleNum:
     def POST(self):
         global SHADOWCASTER
+        global STUNNED
+        global STUNTIME
 
         form = puzzlenumForm()
 
@@ -349,6 +356,8 @@ class setPuzzleNum:
             # return render.admin(SHADOWCASTER, puzzlenumForm, testLightsForm, setStunTimeForm, COLOR, "ERROR")
         SHADOWCASTER = int(form["mydrop"].value)
         config["SHADOWCASTER"] = SHADOWCASTER
+        STUNNED = False
+        STUNTIME = 0
         with open("scconfig.json", "w") as f:
             f.write(json.dumps(config))
             f.close()
@@ -452,7 +461,7 @@ class login:
         # Is it a valud user
         if user not in db or password != db[user]["password"]:
             return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "XXX")
-        if db[user]["solved"]:
+        if db[user]["solved"][str(config["SHADOWCASTER"])]:
             return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
 
         session.logged_in = True
@@ -488,7 +497,7 @@ class sc:
             raise web.seeother('/login')
 
         user = session.get('user')
-        if db[user]["solved"]:
+        if db[user]["solved"][str(config["SHADOWCASTER"])]:
             return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
 
         print "SC", SHADOWCASTER
@@ -511,6 +520,8 @@ class sc:
             return render.sc8(STUNTIME)
         elif SHADOWCASTER == 9:
             return render.eqnswitch(STUNTIME)
+        elif SHADOWCASTER == 10:
+            return render.picture(STUNTIME)
 
         return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "error: no puzzle")
 
@@ -551,34 +562,52 @@ class stunstatus:
 def init_users():
     global db
     # Generate user logins and flags
-    db["znjp"] = {"password": "brak4pres", "solved": False,
-                  "flag": hashlib.sha1("znjp" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["alpha"] = {"password": "ZnTkHA", "solved": False,
-                   "flag": hashlib.sha1("alpha" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["bravo"] = {"password": "dTdRtLY", "solved": False,
-                   "flag": hashlib.sha1("bravo" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["charlie"] = {"password": "dZUokZ", "solved": False, "flag": hashlib.sha1(
-        "charlie" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["delta"] = {"password": "HewLwZ", "solved": False,
-                   "flag": hashlib.sha1("delta" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["echo"] = {"password": "pRhzpa", "solved": False,
-                  "flag": hashlib.sha1("echo" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["foxtrot"] = {"password": "djUTAm", "solved": False, "flag": hashlib.sha1(
-        "foxtrot" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["golf"] = {"password": "DMTBQa", "solved": False,
-                  "flag": hashlib.sha1("golf" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["hotel"] = {"password": "xokRDs", "solved": False,
-                   "flag": hashlib.sha1("hotel" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["india"] = {"password": "PZEUXn", "solved": False,
-                   "flag": hashlib.sha1("india" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["juliet"] = {"password": "gKZFQr", "solved": False,
-                    "flag": hashlib.sha1("juliet" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["1"] = {"password": "1", "solved": False,
-               "flag": hashlib.sha1("1" + "sc" + str(SHADOWCASTER)).hexdigest()}
-    db["2"] = {"password": "2", "solved": False,
-               "flag": hashlib.sha1("2" + "sc" + str(SHADOWCASTER)).hexdigest()}
+    config["TOTALPUZZLES"]
+    db["znjp"] = {"password": "brak4pres", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+                  "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'znjp'), "admin": True}
+    db["alpha"] = {"password": "ZnTkHA", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'aplha'), "admin": False}
+    db["bravo"] = {"password": "dTdRtLY", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+                   "flag": hashlib.sha1("bravo" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
+    db["charlie"] = {"password": "dZUokZ", "solved": db_build_helper_for_solved_status(
+        config["TOTALPUZZLES"]), "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'charlie'), "admin": False}
+    db["delta"] = {"password": "HewLwZ", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'delta'), "admin": False}
+    db["echo"] = {"password": "pRhzpa", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+                  "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'echo'), "admin": False}
+    db["foxtrot"] = {"password": "djUTAm", "solved": db_build_helper_for_solved_status(
+        config["TOTALPUZZLES"]), "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'foxtrot'), "admin": False}
+    db["golf"] = {"password": "DMTBQa", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+                  "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'golf'), "admin": False}
+    db["hotel"] = {"password": "xokRDs", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'hotel'), "admin": False}
+    db["india"] = {"password": "PZEUXn", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'india'), "admin": False}
+    db["juliet"] = {"password": "gKZFQr", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+                    "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'juliet'), "admin": False}
+    db["1"] = {"password": "1", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+               "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], '1'), "admin": False}
+    db["2"] = {"password": "2", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+               "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], '2'), "admin": False}
     sync_db()
     return
+
+
+def db_build_helper_for_solved_status(numOfPuzzles):
+    # assumes shadowcaster index starts at 1
+    toReturn = dict()
+    for i in range(1, numOfPuzzles + 1):
+        toReturn[str(i)] = False
+    return toReturn
+
+
+def db_build_helper_for_flag_gen(numOfPuzzles, username):
+    # assumes shadowcaster index starts at 1
+    toReturn = dict()
+    for i in range(1, numOfPuzzles + 1):
+        toReturn[str(i)] = hashlib.sha1(
+            username + "sc" + str(SHADOWCASTER)).hexdigest()
+    return toReturn
 
 
 def load_db(db_path):
@@ -588,6 +617,9 @@ def load_db(db_path):
         f = open(db_path)
         db = pickle.load(f)
         f.close()
+        # Saved progress is overated
+        # os.remove(db_path)
+        # init_users()
         if DEBUG:
             print "LOAD DB", db
     except:
@@ -595,6 +627,8 @@ def load_db(db_path):
             print "Error loading database. Creating a new one."
         init_users()
         return
+
+    # init_users()
 
 
 def sync_db():
