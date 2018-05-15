@@ -22,7 +22,7 @@ $def with (stunned)
     var ctx;
     var img;
 
-    var blockSize = 160;
+    var blockSize = 80;
 
     var clickX;
     var clickY;
@@ -38,13 +38,13 @@ $def with (stunned)
       ctx = can.getContext('2d');
       img = new Image();
       img.onload = onImage1Load;
-      img.src = "../static/cat.jpg";
+      img.src = "../static/workingCube2.png";
     }
 
     function onImage1Load() {
       var r;
-      for (var i = 0; i < 4; i++) {
-        for (var j = 0; j < 3; j++) {
+      for (var i = 0; i < 8; i++) {
+        for (var j = 0; j < 6; j++) {
           r = new Rectangle(i * blockSize, j * blockSize, i * blockSize + blockSize, j * blockSize + blockSize);
           piecesArray.push(r);
           correctOrder.push(r);
@@ -63,7 +63,7 @@ $def with (stunned)
       var drawX = Math.floor(clickX / blockSize);
       var drawY = Math.floor(clickY / blockSize);
 
-      var index = drawX * 3 + drawY;
+      var index = drawX * 6 + drawY;
 
       var targetRect = piecesArray[index];
       var drawHighlight = true;
@@ -135,9 +135,9 @@ $def with (stunned)
     }
 
     function drawImage() {
-      for (var k = 0; k < 4; k++) {
-        for (var l = 0; l < 3; l++) {
-          r = piecesArray[k * 3 + l];
+      for (var k = 0; k < 8; k++) {
+        for (var l = 0; l < 6; l++) {
+          r = piecesArray[k * 6 + l];
           ctx.drawImage(img, r.left, r.top, r.width, r.height, k * blockSize, l * blockSize, blockSize, blockSize);
         }
       }
