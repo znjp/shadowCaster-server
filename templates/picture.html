@@ -38,12 +38,12 @@ $def with (stunned)
       ctx = can.getContext('2d');
       img = new Image();
       img.onload = onImage1Load;
-      img.src = "../static/workingCube2.png";
+      img.src = "../static/workingCube3.png";
     }
 
     function onImage1Load() {
       var r;
-      for (var i = 0; i < 8; i++) {
+      for (var i = 0; i < 6; i++) {
         for (var j = 0; j < 6; j++) {
           r = new Rectangle(i * blockSize, j * blockSize, i * blockSize + blockSize, j * blockSize + blockSize);
           piecesArray.push(r);
@@ -71,7 +71,7 @@ $def with (stunned)
       drawX *= blockSize;
       drawY *= blockSize;
 
-      ctx.clearRect(0, 0, 640, 480);
+      ctx.clearRect(0, 0, 480, 480);
 
       if (selected1 != undefined && selected2 != undefined) {
         selected1 = selected2 = undefined;
@@ -135,7 +135,7 @@ $def with (stunned)
     }
 
     function drawImage() {
-      for (var k = 0; k < 8; k++) {
+      for (var k = 0; k < 6; k++) {
         for (var l = 0; l < 6; l++) {
           r = piecesArray[k * 6 + l];
           ctx.drawImage(img, r.left, r.top, r.width, r.height, k * blockSize, l * blockSize, blockSize, blockSize);
@@ -183,7 +183,7 @@ $def with (stunned)
       <h1 id="mainHeading">Scrambled Image</h1>
 
       <div id = "canvasContainer">
-        <canvas id="myCanvas" width="640" height="480" onclick="onCanvasClick(event);">
+        <canvas id="myCanvas" width="480" height="480" onclick="onCanvasClick(event);">
 		</canvas>
       </div>
 
