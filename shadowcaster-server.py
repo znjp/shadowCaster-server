@@ -479,7 +479,8 @@ class logout:
         session.user = ""
         session.kill()
         if DEBUG:
-            db["znjp"]["solved"] = False
+            for key in db["znjp"]["solved"]:
+                db["znjp"]["solved"][key] = False
             sync_db()
         referer = web.ctx.env.get('HTTP_REFERER', '/')
         raise web.seeother("/")
@@ -528,7 +529,7 @@ class sc:
 
 class stun:
     def GET(self):
-        #threading.Thread(target=stunLights).start()
+        # threading.Thread(target=stunLights).start()
         return "<html><body><center><form method='POST' action='/stun'><input type='submit' style='height:500px;width:500px' value='Stun!'></form></center></body></html>"
 
     def POST(self):
