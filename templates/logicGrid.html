@@ -1,8 +1,11 @@
+$def with (stunned)
+
 <html>
 	<head><title>ShadowCaster Login</title>
+    <meta charset="UTF-8">
 		<link href='/static/font.css' rel='stylesheet'>
-    <link href='../static/logicGrid.css' rel='stylesheet'>
-    <script src="../static/jquery-2.2.4.min.js"></script>
+    <link href='/static/logicGrid.css' rel='stylesheet'>
+    <script src="/static/jquery-2.2.4.min.js"></script>
 		<style>
 			.concernForm {
 				text-align: left;
@@ -19,13 +22,61 @@
 			input {
    				width: 500px;
 				height: 40px;
-				font-size: 20ptoggle class javascriptx;
+				font-size: 20px;
 				font-family: 'Quantico'
 			 }
 		</style>
+
+    <script type="text/javascript">
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      function flash() {
+        setInterval(f, (Math.random() * 2000));
+      }
+
+      async function f() {
+        for (i = 0; i < (Math.random() * 16); i++) {
+          document.getElementById("logo").src = "/static/red.png";
+          await sleep(50);
+          document.getElementById("logo").src = "/static/white.png";
+          await sleep(50);
+        }
+      }
+      var oReq;
+
+      function stunReqListener() {
+        if (this.responseText == "True") {
+          window.location.reload(1);
+        }
+      }
+
+      function makeStunRequest() {
+        oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", stunReqListener);
+        oReq.open("GET", "/stunstatus");
+        oReq.send();
+      }
+    </script>
+
   </head>
 
   <body>
+
+    $if stunned > 0:
+      <img id="logo" width=300 src="/static/red.png" onload=flash()>
+      <div class="concern" id="timer">STUNNED</div>
+      <script src="/static/timer.js"></script>
+      <script>
+        setTimer(document.getElementById("timer"), $(stunned));
+        setTimeout(function() {
+          window.location.reload(1);
+        }, 5000);
+      </script>
+    $else:
+      <script>setInterval(makeStunRequest, 5000);</script>
+
     <h1>Unknown Agents</h1>
     <table>
       <tr>
@@ -33,41 +84,47 @@
         <th colspan="4">Agent</th>
       </tr>
       <tr>
-        <td>Peters</td>
-        <td>Sonne</td>
-        <td>Gonella</td>
-        <td>Frost</td>
+        <td class='pseudoHeader'>Peters</td>
+        <td class='pseudoHeader'>Sonne</td>
+        <td class='pseudoHeader'>Gonella</td>
+        <td class='pseudoHeader'>Frost</td>
       </tr>
       <tr>
         <th rowspan="4">Energy</th>
-        <td>Retrieved 20% of energy</td>
-        <td class="col0 row0" id='0'></td>
-        <td class="col1 row0" id='1'></td>
-        <td class="col2 row0" id='2'></td>
-        <td class="col3 row0" id='3'></td>
+        <td class='pseudoHeader'>Retrieved 20% of energy</td>
+        <td class="col0 row0" id='0'><div class='game'></div></td>
+        <td class="col1 row0" id='1'><div class='game'></div></td>
+        <td class="col2 row0" id='2'><div class='game'></div></td>
+        <td class="col3 row0" id='3'><div class='game'></div></td>
       </tr>
       <tr>
-        <td>Retrieved 15% of energy</td>
-        <td class="col0 row1"></td>
-        <td class="col1 row1"></td>
-        <td class="col2 row1"></td>
-        <td class="col3 row1"></td>
+        <td class='pseudoHeader'>Retrieved 15% of energy</td>
+        <td class="col0 row1"><div class='game'></div></td>
+        <td class="col1 row1"><div class='game'></div></td>
+        <td class="col2 row1"><div class='game'></div></td>
+        <td class="col3 row1"><div class='game'></div></td>
       </tr>
       <tr>
-        <td>Retrieved 10% of energy</td>
-        <td class="col0 row2"></td>
-        <td class="col1 row2"></td>
-        <td class="col2 row2"></td>
-        <td class="col3 row2"></td>
+        <td class='pseudoHeader'>Retrieved 10% of energy</td>
+        <td class="col0 row2"><div class='game'></div></td>
+        <td class="col1 row2"><div class='game'></div></td>
+        <td class="col2 row2"><div class='game'></div></td>
+        <td class="col3 row2"><div class='game'></div></td>
       </tr>
       <tr>
-        <td>Retrieved 5% of energy</td>
-        <td class="col0 row3"></td>
-        <td class="col1 row3"></td>
-        <td class="col2 row3"></td>
-        <td class="col3 row3"></td>
-
+        <td class='pseudoHeader'>Retrieved 5% of energy</td>
+        <td class="col0 row3"><div class='game'></div></td>
+        <td class="col1 row3"><div class='game'></div></td>
+	<td class="col2 row3"><div class='game'></div></td>
+        <td class="col3 row3"><div class='game'></div></td>
       </tr>
     </table>
+    <div id='clues'>
+      <ol>
+        <li>Agent Peters is more efficient than Agent Sonne.</li>
+        <li>Agent Frost is the most efficient.</li>
+        <li>Agent Sonne is only 5% less effective than Agent Gonella.</li>
+      </ol>
+    </div>
     <script src="../static/logicGrid.js"></script>
   </body>

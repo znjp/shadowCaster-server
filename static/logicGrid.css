@@ -5,32 +5,34 @@
   background-color: black;
   color: #F5F5F5;
   align-content: center;
+  font-family: 'Quantico';
 }
 
 table {
-  padding: 1em;
+  padding: 0px;
   /* table-layout: fixed; */
-  width: 50vw;
+  width: 45vw;
   height: 50vh;
 }
 
 tr {
-  padding: 1em;
+  padding: 0px;
 }
 
 th {
   background-color: #F5F5F5;
   color: black;
-  padding: inherit;
+  padding: 2vw;
   /* word-wrap: break-word; */
 }
 
 td {
   border: 1px solid #F5F5F5;
-  padding-top: 2vh;
+  /*padding-top: 2vh;
   padding-bottom: 2vh;
   padding-left: 1.5vw;
-  padding-right: 1.5vw;
+  padding-right: 1.5vw;*/
+  padding:0px;
   word-wrap: break-word;
 }
 
@@ -38,10 +40,39 @@ td {
   visibility:hidden
 }
 
-.selected {
+.selected div {
   background-color: rgb(65, 222, 65);
 }
 
-.deselected {
+.deselected div {
   background-color: rgb(218, 46, 46);
+}
+
+.game {
+	display: inline-block;
+	width: 5vw;
+	height: 5vw;
+	padding: 0px;
+}
+
+.pseudoHeader {
+	font-weight: bold;
+	padding:0.25vw;
+}
+
+h1 {
+  padding: 2vh;
+}
+
+#clues {
+  width: 45vw;
+  text-align: left;
+  padding: 2vh;
+}
+
+ol {
+  text-align: left;
+}
+li {
+    text-align: left;
 }

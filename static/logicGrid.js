@@ -1,26 +1,31 @@
 boardSetup = [null, null, null, null, null, null, null, null, null, null, null, null,null, null, null, null];
 
 $("td").click(function() {
- // console.log(boardSetup);
   var currentClasses = ($(this).attr("class")).split(' ');
-  var row = Number(currentClasses[1][3]);
-  var col = Number(currentClasses[0][3]);
-  if (boardSetup[row*4 + col]) {
-	boardSetup[row*4 + col] = null
-	truthCorrect(col, row);
-  } else if (boardSetup[row*4 + col] == null) {
-	boardSetup[row*4 + col] = true
-  } else if (boardSetup[row*4 + col] === false) {
-	boardSetup[row*4 + col] = true
-        truthCorrect(col, row);	
+  if (currentClasses.length > 1) {
+  	var row = Number(currentClasses[1][3]);
+  	var col = Number(currentClasses[0][3]);
+  	if (boardSetup[row*4 + col]) {
+		boardSetup[row*4 + col] = null
+		truthCorrect(col, row);
+  	} else if (boardSetup[row*4 + col] == null) {
+		boardSetup[row*4 + col] = true
+  	} else if (boardSetup[row*4 + col] === false) {
+		boardSetup[row*4 + col] = true
+        	truthCorrect(col, row);
+  	}
+  	cleanBoard();
+  	if (clrBoard() == 4) {
+      if (checkRes()) {
+        document.location = "/release?e=c03144f689169c6f829f920613285ca58a4ab9bd";
+      } else {
+
+      }
+    }
   }
-  cleanBoard();
-  clrBoard();
-  console.log(boardSetup);
 });
 
 function cleanBoard() {
-  console.log('foo')
   trueLoc = [];
   for (var i = 0; i < boardSetup.length; i++) {
     if (boardSetup[i]) {
@@ -29,31 +34,18 @@ function cleanBoard() {
 	boardSetup[i] = null;
     }
   }
-  console.log('truth: ' + trueLoc);
   for (var j = 0; j < trueLoc.length; j++) {
 	var col = trueLoc[j] % 4;
 	var row = (trueLoc[j] - col) / 4;
 	for (var i = 0; i < 4; i++) {
         	if(4*i+col != 4*row+col){
-			console.log('row: ' +row)
-                        console.log('col: ' + col);
                 	boardSetup[4*i+col] = false;
-       	 	} else if (4*i+col == 4*row+col) {
-                	boardSetup[4*i+col] = true;
-        	}
+       	 	}
  	 }
   	for (var i = 0; i < 4; i++) {
-		console.log('vertical');
-        	console.log('row: ' +row)
-                console.log('col: ' + col);
-        	if(4*row+i != 4*row+col){
-			console.log('row: ' +row)
-                        console.log('col: ' + col);
+        	if(4*row+i != 4*row+col) {
                 	boardSetup[4*row+i] = false;
-        	} else if (4*row+i == 4*row+col) {
-               	 	boardSetup[4*row+i] = true;
         	}
-
   	}
   }
 }
@@ -73,6 +65,7 @@ function truthCorrect(newX, newY){
 }
 
 function clrBoard() {
+  var truthCount = 0;
 	for (var i = 0; i < boardSetup.length; i++) {
 		var col = i % 4;
 	        var row = (i - col) / 4;
@@ -81,10 +74,16 @@ function clrBoard() {
 			$('.col' + col.toString() + '.row' + row.toString()).removeClass('deselected');
 		} else if (boardSetup[i] == false) {
 			$('.col' + col.toString() + '.row' + row.toString()).removeClass('selected');
-                        $('.col' + col.toString() + '.row' + row.toString()).addClass('deselected');
+      $('.col' + col.toString() + '.row' + row.toString()).addClass('deselected');
 		} else if (boardSetup[i] == true) {
 			$('.col' + col.toString() + '.row' + row.toString()).addClass('selected');
-                        $('.col' + col.toString() + '.row' + row.toString()).removeClass('deselected');
-		}
+      $('.col' + col.toString() + '.row' + row.toString()).removeClass('deselected');
+      truthCount += 1;
+    }
 	}
+  return truthCount
+}
+
+function checkRes() {
+  return boardSetup[3] && boardSetup[4] && boardSetup[10] && boardSetup[13]
 }

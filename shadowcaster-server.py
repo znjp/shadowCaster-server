@@ -523,6 +523,8 @@ class sc:
             return render.eqnswitch(STUNTIME)
         elif SHADOWCASTER == 10:
             return render.picture(STUNTIME)
+        elif SHADOWCASTER == 11:
+            return render.logicGrid(STUNTIME)
 
         return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "error: no puzzle")
 
