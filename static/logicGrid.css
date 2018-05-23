@@ -1,0 +1,47 @@
+* {
+  padding: 0px;
+  margin: auto;
+  text-align: center;
+  background-color: black;
+  color: #F5F5F5;
+  align-content: center;
+}
+
+table {
+  padding: 1em;
+  /* table-layout: fixed; */
+  width: 50vw;
+  height: 50vh;
+}
+
+tr {
+  padding: 1em;
+}
+
+th {
+  background-color: #F5F5F5;
+  color: black;
+  padding: inherit;
+  /* word-wrap: break-word; */
+}
+
+td {
+  border: 1px solid #F5F5F5;
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+  padding-left: 1.5vw;
+  padding-right: 1.5vw;
+  word-wrap: break-word;
+}
+
+.hidden {
+  visibility:hidden
+}
+
+.selected {
+  background-color: rgb(65, 222, 65);
+}
+
+.deselected {
+  background-color: rgb(218, 46, 46);
+}
