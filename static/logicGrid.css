@@ -10,9 +10,6 @@
 
 table {
   padding: 0px;
-  /* table-layout: fixed; */
-  width: 45vw;
-  height: 50vh;
 }
 
 tr {
@@ -22,26 +19,26 @@ tr {
 th {
   background-color: #F5F5F5;
   color: black;
-  padding: 2vw;
-  /* word-wrap: break-word; */
+  font-size:3vh;
+  padding: 0.5vh;
+  padding-left: 0.5vw;
+  padding-right:0.5vw;
 }
 
 td {
   border: 1px solid #F5F5F5;
-  /*padding-top: 2vh;
-  padding-bottom: 2vh;
-  padding-left: 1.5vw;
-  padding-right: 1.5vw;*/
-  padding:0px;
+  padding:5px;
   word-wrap: break-word;
+  font-size:1.5vw;
 }
 
 .hidden {
-  visibility:hidden
+  visibility:hidden;
 }
 
 .selected div {
   background-color: rgb(65, 222, 65);
+
 }
 
 .deselected div {
@@ -50,14 +47,17 @@ td {
 
 .game {
 	display: inline-block;
-	width: 5vw;
-	height: 5vw;
+	width: 70%;
+	height: 70%;
 	padding: 0px;
+	border-radius: 500vh;
 }
 
 .pseudoHeader {
 	font-weight: bold;
-	padding:0.25vw;
+	padding:0.25vh;
+	height: 6vw;
+	width: 6vw;
 }
 
 h1 {
@@ -66,8 +66,9 @@ h1 {
 
 #clues {
   width: 45vw;
-  text-align: left;
+  font-size: 3.5vh;
   padding: 2vh;
+  margin: auto;
 }
 
 ol {
@@ -75,4 +76,7 @@ ol {
 }
 li {
     text-align: left;
+}
+.invisible {
+	display: none;
 }
