@@ -1,38 +1,55 @@
-function timer(callback, delay) {
-    var id, started, remaining = delay, running
-
-    this.start = function() {
-        running = true
-        started = new Date()
-        id = setTimeout(callback, remaining)
-    }
-
-    this.pause = function() {
-        running = false
-        clearTimeout(id)
-        remaining -= new Date() - started
-    }
-
-    this.getTimeLeft = function() {
-        if (running) {
-            this.pause()
-            this.start()
-        }
-
-        return remaining
-    }
-
-    this.getStateRunning = function() {
-        return running
-    }
-
-    this.start()
-}
+document.getElementById("0").onclick = function () {
+  toggle(0)
+};
+document.getElementById("1").onclick = function () {
+  toggle(1)
+};
+document.getElementById("2").onclick = function () {
+  toggle(2)
+};
+document.getElementById("3").onclick = function () {
+  toggle(3)
+};
+document.getElementById("4").onclick = function () {
+  toggle(4)
+};
+document.getElementById("5").onclick = function () {
+  toggle(5)
+};
+document.getElementById("6").onclick = function () {
+  toggle(6)
+};
+document.getElementById("7").onclick = function () {
+  toggle(7)
+};
+document.getElementById("8").onclick = function () {
+  toggle(8)
+};
+document.getElementById("9").onclick = function () {
+  toggle(9)
+};
+document.getElementById("10").onclick = function () {
+  toggle(10)
+};
+document.getElementById("11").onclick = function () {
+  toggle(11)
+};
+document.getElementById("12").onclick = function () {
+  toggle(12)
+};
+document.getElementById("13").onclick = function () {
+  toggle(13)
+};
+document.getElementById("14").onclick = function () {
+  toggle(14)
+};
+document.getElementById("15").onclick = function () {
+  toggle(15)
+};
 
 boardSetup = [null, null, null, null, null, null, null, null, null, null, null, null,null, null, null, null];
 losing = true
 $("td").click(function() {
-	console.log(losing)
 	if (losing === true) {
   		var currentClasses = ($(this).attr("class")).split(' ');
   		if (currentClasses.length > 1) {
@@ -46,33 +63,32 @@ $("td").click(function() {
   			} else if (boardSetup[row*4 + col] === false) {
 				boardSetup[row*4 + col] = true
         			truthCorrect(col, row);
-  			}	
+  			}
   			cleanBoard();
   			if (clrBoard() == 4) {
       				if (checkRes()) {
         				document.location = "/release?e=c03144f689169c6f829f920613285ca58a4ab9bd";
       				} else {
-					losing = false;
-					alert("Incorrect deduction.\r\nYou must pause to let the shadowcasters pass.");
-					punish = new timer(function() {
-						losing = true;
-        					console.log('3 ' + losing);					 
-					}, 4000)
-					$('#timing').removeClass('hidden');
-					//document.getElementById("timing").outerHTML = punish.getTimeLeft()/1000;
-					while (punish.getTimeLeft()>0) {
-						//$('#timing').text(punish.getTimeLeft()/1000);
-						//console.log(punish.getTimeLeft()/1000);
-						//console.log(document.getElementById("timing"))
-						document.getElementById("timing").innerHTML = punish.getTimeLeft()/1000;
-						//console.log(document.getElementById("hidden").outerHTML)
-						//console.log(document.getElementById("timing").outerHTML)
-					}
-					$('#timing').addClass('hidden');
-      				}
-    			}
+      					losing = false;
+                console.log('hu');
+      					alert("Incorrect deduction.\r\nYou must pause to let the shadowcasters pass.");
+      					punish = new timer(function() {
+      						losing = true;
+              					console.log('3 ' + losing);
+      					}, 4000)
+                console.log(punish.getTimeLeft());
+                var x = setInterval(function() {
+                  console.log('ji')
+                  document.getElementById("timing").innerHTML = 'Time left ' + (Math.round(punish.getTimeLeft()/100)/10).toString() + 's';
+                  if (punish.getTimeLeft()/1000 < 0) {
+                    clearInterval(x)
+                    document.getElementById("timing").innerHTML = 'Time left: 0s'
+                  }
+                }, 100);
+              }
+    		}
   		}
-	}	
+	}
 });
 
 function cleanBoard() {
