@@ -6,17 +6,21 @@
   color: #F5F5F5;
   align-content: center;
   font-family: 'Quantico';
+  word-wrap: break-word;
 }
 
 table {
   padding: 0px;
+  /* height: 55vw;
+  width: 55vw; */
+  margin:auto;
 }
 
 tr {
   padding: 0px;
 }
 
-th {
+td.header {
   background-color: #F5F5F5;
   color: black;
   font-size:3vh;
@@ -30,10 +34,12 @@ td {
   padding:5px;
   word-wrap: break-word;
   font-size:1.5vw;
+  width: 9vw;
+  height: 9vw;
 }
 
 .hidden {
-  visibility:hidden;
+  border-color: black;
 }
 
 .selected div {
@@ -41,7 +47,7 @@ td {
 
 }
 
-.deselected div {
+.deselected div{
   background-color: rgb(218, 46, 46);
 }
 
@@ -50,23 +56,17 @@ td {
 	width: 70%;
 	height: 70%;
 	padding: 0px;
-	border-radius: 500vh;
-}
-
-.pseudoHeader {
-	font-weight: bold;
-	padding:0.25vh;
-	height: 6vw;
-	width: 6vw;
+	border-radius: 500000vh;
+  /* background-color: pink; */
 }
 
 h1 {
-  padding: 2vh;
+  padding: 2vw;
 }
 
 #clues {
   width: 45vw;
-  font-size: 3.5vh;
+  font-size: 3.5vw;
   padding: 2vh;
   margin: auto;
 }

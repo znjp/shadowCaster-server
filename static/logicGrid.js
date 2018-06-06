@@ -1,32 +1,32 @@
 function timer(callback, delay) {
-    var id, started, remaining = delay, running
+  var id, started, remaining = delay,
+    running;
+  this.start = function() {
+    running = true
+    started = new Date()
+    id = setTimeout(callback, remaining)
+  }
 
-    this.start = function() {
-        running = true
-        started = new Date()
-        id = setTimeout(callback, remaining)
+  this.pause = function() {
+    running = false
+    clearTimeout(id)
+    remaining -= new Date() - started
+  }
+
+  this.getTimeLeft = function() {
+    if (running) {
+      this.pause()
+      this.start()
     }
 
-    this.pause = function() {
-        running = false
-        clearTimeout(id)
-        remaining -= new Date() - started
-    }
+    return remaining
+  }
 
-    this.getTimeLeft = function() {
-        if (running) {
-            this.pause()
-            this.start()
-        }
+  this.getStateRunning = function() {
+    return running
+  }
 
-        return remaining
-    }
-
-    this.getStateRunning = function() {
-        return running
-    }
-
-    this.start()
+  this.start()
 }
 
 document.getElementById("0").onclick = function() {
@@ -80,46 +80,6 @@ document.getElementById("15").onclick = function() {
 
 boardSetup = [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null];
 losing = true
-// $("td").click(function() {
-// 	if (losing === true) {
-//   		var currentClasses = ($(this).attr("class")).split(' ');
-//   		if (currentClasses.length > 1) {
-//   			var row = Number(currentClasses[1][3]);
-//   			var col = Number(currentClasses[0][3]);
-//   			if (boardSetup[row*4 + col]) {
-// 				boardSetup[row*4 + col] = null
-// 				truthCorrect(col, row);
-//   			} else if (boardSetup[row*4 + col] == null) {
-// 				boardSetup[row*4 + col] = true
-//   			} else if (boardSetup[row*4 + col] === false) {
-// 				boardSetup[row*4 + col] = true
-//         			truthCorrect(col, row);
-//   			}
-//   			cleanBoard();
-//   			if (clrBoard() == 4) {
-//       				if (checkRes()) {
-//         				document.location = "/release?e=c03144f689169c6f829f920613285ca58a4ab9bd";
-//       				} else {
-//       					losing = false;
-//                 console.log('hu');
-//       					alert("Incorrect deduction.\r\nYou must pause to let the shadowcasters pass.");
-//       					punish = new timer(function() {
-//       						losing = true;
-//               					console.log('3 ' + losing);
-//       					}, 4000)
-//                 var x = setInterval(function() {
-//                   console.log('ji')
-//                   document.getElementById("timing").innerHTML = 'Time left ' + (Math.round(punish.getTimeLeft()/100)/10).toString() + 's';
-//                   if (punish.getTimeLeft()/1000 < 0) {
-//                     clearInterval(x)
-//                     document.getElementById("timing").innerHTML = 'Time left: 0s'
-//                   }
-//                 }, 100);
-//               }
-//     		}
-//   		}
-// 	}
-// });
 
 function cleanBoard() {
   trueLoc = [];
@@ -180,10 +140,6 @@ function clrBoard() {
   return truthCount
 }
 
-function checkRes() {
-  return boardSetup[3] && boardSetup[4] && boardSetup[10] && boardSetup[13]
-}
-
 function changeBoard(id) {
   if (losing === true) {
     var col = id % 4
@@ -199,18 +155,16 @@ function changeBoard(id) {
     }
     cleanBoard();
     if (clrBoard() == 4) {
-      if (checkRes()) {
+      if (boardSetup[3] && boardSetup[4] && boardSetup[10] && boardSetup[13]) {
         document.location = "/release?e=c03144f689169c6f829f920613285ca58a4ab9bd";
       } else {
         losing = false;
-        console.log('hu');
         alert("Incorrect deduction.\r\nYou must pause to let the shadowcasters pass.");
         punish = new timer(function() {
           losing = true;
           console.log('3 ' + losing);
         }, 4000)
         var x = setInterval(function() {
-          console.log('ji')
           document.getElementById("timing").innerHTML = 'Time left: ' + (Math.round(punish.getTimeLeft() / 100) / 10).toString() + 's';
           if (punish.getTimeLeft() / 1000 < 0) {
             clearInterval(x)
