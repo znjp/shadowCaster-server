@@ -1,0 +1,136 @@
+$def with (stunned)
+
+<html>
+	<head><title>Logic Game</title>
+    <meta charset="UTF-8">
+		<link href='/static/font.css' rel='stylesheet'>
+    <link href='/static/logicGrid.css' rel='stylesheet'>
+    <script src="/static/jquery-2.2.4.min.js"></script>
+		<style>
+			.concernForm {
+				text-align: left;
+				color: rgb(255, 255, 255);
+				font-size: 30px;
+				font-family: 'Quantico'
+			}
+			.concern{
+				text-align: center;
+				color: rgb(255, 255, 255);
+				font-size: 40px;
+				font-family: 'Quantico'
+			}
+			input {
+   				width: 500px;
+				height: 40px;
+				font-size: 20px;
+				font-family: 'Quantico'
+			 }
+		</style>
+
+    <script type="text/javascript">
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      function flash() {
+        setInterval(f, (Math.random() * 2000));
+      }
+
+      async function f() {
+        for (i = 0; i < (Math.random() * 16); i++) {
+          document.getElementById("logo").src = "/static/red.png";
+          await sleep(50);
+          document.getElementById("logo").src = "/static/white.png";
+          await sleep(50);
+        }
+      }
+      var oReq;
+
+      function stunReqListener() {
+        if (this.responseText == "True") {
+          window.location.reload(1);
+        }
+      }
+
+      function makeStunRequest() {
+        oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", stunReqListener);
+        oReq.open("GET", "/stunstatus");
+        oReq.send();
+      }
+    </script>
+
+  </head>
+
+  <body>
+
+    $if stunned > 0:
+      <img id="logo" width=300 src="/static/red.png" onload=flash()>
+      <div class="concern" id="timer">STUNNED</div>
+      <script src="/static/timer.js"></script>
+      <script>
+        setTimer(document.getElementById("timer"), $(stunned));
+        setTimeout(function() {
+          window.location.reload(1);
+        }, 5000);
+      </script>
+    $else:
+      <script>setInterval(makeStunRequest, 5000);</script>
+
+    <h1>Unknown Agents</h1>
+    <!-- <h3 id='timing' class='hidden'>5.0</h3> -->
+    <h3 id='timing'></h3>
+    <table>
+      <tr>
+        <td colspan="2" rowspan="2" class="hidden"></td>
+        <td colspan="4" class="header">Agent ID</th>
+      </tr>
+      <tr>
+        <td class='pseudoHeader'>0</td>
+        <td class='pseudoHeader'>1</td>
+        <td class='pseudoHeader'>2</td>
+        <td class='pseudoHeader'>3</td>
+      </tr>
+      <tr>
+        <td rowspan="4" class="header">Color</th>
+        <td class='pseudoHeader yellow'>Yellow</td>
+        <td class="col0 row0" id='0'><div class='game'></div></td>
+        <td class="col1 row0" id='1'><div class='game'></div></td>
+        <td class="col2 row0" id='2'><div class='game'></div></td>
+        <td class="col3 row0" id='3'><div class='game'></div></td>
+      </tr>
+      <tr>
+        <td class='pseudoHeader grey'>Grey</td>
+        <td class="col0 row1" id='4'><div class='game'></div></td>
+        <td class="col1 row1" id='5'><div class='game'></div></td>
+        <td class="col2 row1" id='6'><div class='game'></div></td>
+        <td class="col3 row1" id='7'><div class='game'></div></td>
+      </tr>
+      <tr>
+        <td class='pseudoHeader blue'>Blue</td>
+        <td class="col0 row2" id='8'><div class='game'></div></td>
+        <td class="col1 row2" id='9'><div class='game'></div></td>
+        <td class="col2 row2" id='10'><div class='game'></div></td>
+        <td class="col3 row2" id='11'><div class='game'></div></td>
+      </tr>
+      <tr>
+        <td class='pseudoHeader pink'>Pink</td>
+        <td class="col0 row3" id='12'><div class='game'></div></td>
+        <td class="col1 row3" id='13'><div class='game'></div></td>
+	      <td class="col2 row3" id='14'><div class='game'></div></td>
+        <td class="col3 row3" id='15'><div class='game'></div></td>
+      </tr>
+    </table>
+    <div id='clues2' class="clue">
+      <p text-align="left">
+        &lpar;<strong class="grey">Grey</strong> &amp;&amp; 1&rpar; 	&equals;&equals; true<br>
+        if &lpar;<strong class="yellow">Yellow</strong> &amp;&amp; 1&rpar; &lcub;<br>
+        &emsp; &lpar;<strong class="blue">Blue</strong> &amp;&amp; 3&rpar; &equals; <strong class="grey">Grey</strong> &amp;&amp; 1&rpar;<br>
+        &rcub; else &lcub;<br>
+        &emsp; &lpar;<strong class="pink">Pink</strong> &amp;&amp; 0&rpar; &equals; &excl;&lpar;<strong class="yellow">Yellow</strong> &amp;&amp; 1&rpar;<br>
+        &rcub;<br>
+        &lpar;<strong class="yellow">Yellow</strong> &amp;&amp; 2&rpar; &equals; &excl;&lpar;<strong class="pink">Pink</strong> &amp;&amp; 0&rpar;
+      </p>
+    </div>
+    <script src="../static/logicGrid2.js"></script>
+  </body>

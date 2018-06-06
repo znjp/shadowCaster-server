@@ -66,9 +66,21 @@ h1 {
 
 #clues {
   width: 45vw;
-  font-size: 3.5vw;
+  font-size: 2.5vw;
   padding: 2vh;
   margin: auto;
+}
+
+#clues2 {
+  width: 45vw;
+  font-size: 2.5vw;
+  padding: 2vh;
+  margin: auto;
+  text-align: left;
+}
+
+div.clue p {
+  text-align: left;
 }
 
 ol {
@@ -83,4 +95,35 @@ li {
 h3 {
   padding-bottom: 1vh;
   font-size: 2vw;
+}
+
+.pseudoHeader.blue {
+  color: #3399ff;
+}
+
+.pseudoHeader.pink {
+  color: #ff99ff;
+}
+
+.pseudoHeader.grey {
+  color: #d1d1d1;
+}
+
+.pseudoHeader.yellow {
+  color: #ffcc00;
+}
+.blue {
+  color: #3399ff;
+}
+
+.pink {
+  color: #ff99ff;
+}
+
+.grey {
+  color: #d1d1d1;
+}
+
+.yellow {
+  color: #ffcc00;
 }
