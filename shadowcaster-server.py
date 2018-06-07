@@ -526,7 +526,7 @@ class sc:
         elif SHADOWCASTER == 11:
             return render.logicGrid(STUNTIME)
         elif SHADOWCASTER == 12:
-            return render.disc(STUNTIME)
+            return render.logicGrid2(STUNTIME)
         return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "error: no puzzle")
 
 
