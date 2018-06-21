@@ -20,8 +20,6 @@
 
 - Reveal flag on "you've already released this flag" page
 
-- User Notifications (SA is near)
-
 - More points for early solves
 
 - Refactor to remove JavaScript processing
@@ -30,18 +28,29 @@
 
 #### To Categorize
 ##### Admin Interface for SC
- - Create a web interface for changing the shadowcaster puzzle number
- - Adjust the energy levels
- - Stun and flag duration
- - test LEDs; Get GPIO status
+ <strike>- Create a web interface for changing the shadowcaster puzzle number</strike>
+ <strike> - Adjust the energy levels</strike>
+ <strike> - Stun and flag duration</strike>
+ <strike> - test LEDs; Get GPIO status</strike>
  - Add/remove teams; change password
+ - template for printing out team credentials
+ - Single button to Reset everything (all solves, energy levels) for new game
 
 ##### Real DB integration
- - admin teams
+ - teams
+ - sc settings
 
+##### Scoreboard integration
+ - Have a way to configure the auto submitting of flags if the SC's can have internet access
+ - Have a way to lock a team to a single shadowcaster at a time; once logged in to one, can't log into another?
+
+##### "Push" notifications
+ - Alert on puzzles screen when a ShadowAgent is near
 
 **Running the Game**
 - Rotate SA locations (inside/outside) if it's cold
 - Make sure there are places to hide around SC locations
 - Stunning maybe takes points away
 - Glow sticks for SAs
+- Explain the rules of flag submitting
+- More points for early solves (motivate splitting up/working independently)

@@ -10,6 +10,7 @@ from web import form
 import threading
 import signal
 import json
+import sqlite3
 
 
 # This line causes this script to be somewhat unresponsive to ctrl-C
@@ -22,15 +23,26 @@ DEBUG = True
 # os.chdir("/home/pi/shadowcaster-server")
 
 # Load the configuration file
-with open('scconfig.json', 'r') as f:
-    config = json.load(f)
+#with open('scconfig.json', 'r') as f:
+#    config = json.load(f)
 # And set the initial values
-SHADOWCASTER = config["SHADOWCASTER"]  # SC Number
-TOTALPUZZLES = config["TOTALPUZZLES"]  # Total Number of Puzzles
-ENERGY = config["ENERGY"]  # Energy level
-STUNDURATION = config["STUNDURATION"]  # Stun duration in seconds
-RELEASEDURATION = config["RELEASEDURATION"]  # Release duration In seconds
-f.close()
+#SHADOWCASTER = config["SHADOWCASTER"]  # SC Number
+#TOTALPUZZLES = config["TOTALPUZZLES"]  # Total Number of Puzzles
+#ENERGY = config["ENERGY"]  # Energy level
+#STUNDURATION = config["STUNDURATION"]  # Stun duration in seconds
+#RELEASEDURATION = config["RELEASEDURATION"]  # Release duration In seconds
+#f.close()
+
+db = web.database(dbn='sqlite', db='scdb.sql')
+result = db.select('sc')
+config = dict(result[0])
+
+SHADOWCASTER = config["scnum"]  # SC Number
+TOTALPUZZLES = config["total"]  # Total Number of Puzzles
+ENERGY = config["energy"]  # Energy level
+STUNDURATION = config["stun"]  # Stun duration in seconds
+RELEASEDURATION = config["release"]  # Release duration In seconds
+SECRET = config["secret"] #Game secret
 
 COLOR = "blue"  # Initial color
 
@@ -62,9 +74,9 @@ except:
 
 
 # Our "database"
-db = {}
+#db = {}
 # db = web.database(dbn='postgres', usr='username', pw='password', db='dbname')
-last_sync = 0
+#last_sync = 0
 
 render = web.template.render('templates/')
 urls = ('/', 'sc',
@@ -76,7 +88,8 @@ urls = ('/', 'sc',
         '/logout', 'logout',  # logout
         '/energy', 'energy',  # current energy level
         '/release', 'release',  # win
-        '/admin', 'admin',  # SC administration panel
+        #Admin realted interfaces
+        '/admin', 'admin',  # Main administration panel
         '/testRelease', 'testRelease',
         '/testStun', 'testStun',
         '/setPuzzleNum', 'setPuzzleNum',
@@ -216,6 +229,18 @@ def stunLights():
             GPIO.output(RED, False)
     STUNNED = False
 
+def setColor():
+    global ENERGY
+    global COLOR
+
+    if ENERGY < 100 and ENERGY > 70:
+        COLOR = "blue"
+    if ENERGY < 70 and ENERGY > 30:
+        COLOR = "green"
+    if ENERGY < 30:
+        COLOR = "red"
+    if DEBUG:
+        print "Color is now", COLOR
 
 class energy:
     def GET(self):
@@ -234,9 +259,20 @@ class release:
         if not session.get('logged_in'):
             raise web.seeother('/login')
 
+        #Get the user from the database
         user = session.get('user')
+        vars = dict(agent=user)
+        try:
+            result = db.select('agents', where="agent = $agent", vars=vars, limit=1)
+            agent = dict(result[0])
+        except Exception as e:
+            if DEBUG:
+                print "User not in database."
+            raise web.seeother('/login')
+
         # if db[user]["solved"]:
-        if db[user]["solved"][str(config["SHADOWCASTER"])]:
+        #if db[user]["solved"][str(config["SHADOWCASTER"])]:
+        if agent["solved"] == 1:
             return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
 
         # Get solved key and validate
@@ -249,24 +285,189 @@ class release:
             return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent key invalid")
 
         ENERGY = ENERGY - 10
-        if ENERGY < 100 and ENERGY > 70:
-            COLOR = "blue"
-        if ENERGY < 70 and ENERGY > 30:
-            COLOR = "green"
-        if ENERGY < 30:
-            COLOR = "red"
-        if DEBUG:
-            print "Color is now", COLOR
+        setColor()
 
         threading.Thread(target=releaseLights).start()
 
-        db[user]["solved"][str(config["SHADOWCASTER"])] = True
-        sync_db()
+        #db[user]["solved"][str(config["SHADOWCASTER"])] = True
+        #sync_db()
+        num_updated  = db.update('agents', where='agent = "' + agent["agent"] +'"', solved = 1)
+        if num_updated != 1 and DEBUG:
+            print "Error updating solved status for agent."
 
-        return render.release(SHADOWCASTER, db[user]["flag"][str(config["SHADOWCASTER"])])
+        return render.release(SHADOWCASTER, agent["flag"]) #db[user]["flag"][str(config["SHADOWCASTER"])])
 
 
-# ADMIN FUNCTIONS
+class login:
+    global db
+
+    loginForm = form.Form(
+        form.Textbox("user",
+                     form.notnull,
+                     pre="<div class='concernForm'><font color=white><b>Agent ID:</b></div>",
+                     description=""),
+        form.Password("password",
+                      form.notnull,
+                      pre="<div class='concernForm'><font color=white><b>Password:</b></div>",
+                      description=""),
+        form.Button("Login",
+                    description="Login",
+                    style="font-family: Quantico; font-size: 30px;"))
+
+    def GET(self):
+        global COLOR
+        global STUNNED
+        global STUNTIME
+
+        # If we have a logged in user, redirect them to the puzzle
+        if session.get('logged_in'):
+            raise web.seeother('/sc')
+
+        # else, have them login
+        return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "")
+
+    def POST(self):
+        form = self.loginForm()
+
+        if not form.validates():
+            return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "XXX")
+
+        user = str(form.d.user).lower()
+        password = form.d.password
+
+
+        #Get the user from the database
+        vars = dict(agent=user)
+        try:
+            result = db.select('agents', where="agent = $agent", vars=vars, limit=1)
+            agent = dict(result[0])
+        except Exception as e:
+            if DEBUG:
+                print "User not in database."
+            return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "XXX")
+        
+        # Is it a valud user?
+        if password != agent["password"]:
+            return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "XXX")
+        if agent["solved"] == 1:
+            #TODO: Display flag
+            return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
+
+
+        #if user not in db or password != db[user]["password"]:
+        #    return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "XXX")
+        #if db[user]["solved"][str(config["SHADOWCASTER"])]:
+        #    return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
+
+        session.logged_in = True
+        session.user = user
+
+        raise web.seeother('/sc')
+
+
+class logout:
+    global db
+
+    def GET(self):
+
+        session.logged_in = False
+        session.user = ""
+        session.kill()
+        if DEBUG:
+            db.update('agents', where='agent = "znjp"', solved = 0)
+            #for key in db["znjp"]["solved"]:
+            #    db["znjp"]["solved"][key] = False
+            #sync_db()
+        #referer = web.ctx.env.get('HTTP_REFERER', '/')
+        raise web.seeother("/")
+
+
+class sc:
+    global db
+    global STUNNED
+    global ENERGY
+    global COLOR
+
+    def GET(self):
+        # Is the user logged in?
+        if not session.get('logged_in'):
+            raise web.seeother('/login')
+
+        user = session.get('user')
+        #Has the agent already solved the challenge?
+        vars = dict(agent=user)
+        try:
+            result = db.select('agents', where="agent = $agent", vars=vars, limit=1)
+            agent = dict(result[0])
+        except Exception as e:
+            if DEBUG:
+                print "User not in database."
+            raise web.seeother('/login')
+
+        if agent["solved"]:
+            #TODO: Re-release flag
+            return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
+
+        if SHADOWCASTER == 1:
+            return render.intswitch(STUNTIME)
+        elif SHADOWCASTER == 2:
+            return render.hexswitch(STUNTIME)
+        elif SHADOWCASTER == 3:
+            return render.dragdropone(STUNTIME)
+        elif SHADOWCASTER == 4:
+            return render.dragdroptwo(STUNTIME)
+        elif SHADOWCASTER == 5:
+            return render.toggleone(STUNTIME)
+        elif SHADOWCASTER == 6:
+            return render.toggletwo(STUNTIME)
+        elif SHADOWCASTER == 7:
+            return render.simon(STUNTIME)
+        elif SHADOWCASTER == 8:
+            return render.sc8(STUNTIME)
+        elif SHADOWCASTER == 9:
+            return render.eqnswitch(STUNTIME)
+        elif SHADOWCASTER == 10:
+            return render.picture(STUNTIME)
+        elif SHADOWCASTER == 11:
+            return render.logicGrid(STUNTIME)
+
+        return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "error: no puzzle")
+
+
+class stun:
+    def GET(self):
+        # threading.Thread(target=stunLights).start()
+        return "<html><body><center><form method='POST' action='/stun'><input type='submit' style='height:500px;width:500px' value='Stun!'></form></center></body></html>"
+
+    def POST(self):
+        threading.Thread(target=stunLights).start()
+        referer = web.ctx.env.get('HTTP_REFERER', '/')
+        raise web.seeother(referer)
+
+
+class unstun:
+    def GET(self):
+        global STUNNED
+        global STUNTIME
+        STUNNED = False
+        STUNTIME = 0
+        return "Unstunned!"
+
+    def POST(self):
+        global STUNNED
+        global STUNTIME
+        STUNNED = False
+        STUNTIME = 0
+        web.seeother('/admin')
+
+
+class stunstatus:
+    def GET(self):
+        global STUNNED
+        return STUNNED
+
+
+########## ADMIN FUNCTIONS ###############
 puzzlenumForm = form.Form(
     form.Dropdown('mydrop', zip(range(1, TOTALPUZZLES + 1), range(1,
                                                                   TOTALPUZZLES + 1)), style="font-family: Quantico; font-size: 30px;"),
@@ -353,14 +554,18 @@ class setPuzzleNum:
 
         if not form.validates():
             raise web.seeother('/admin?status=Bad puzzle number')
-            # return render.admin(SHADOWCASTER, puzzlenumForm, testLightsForm, setStunTimeForm, COLOR, "ERROR")
+
+        num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), scnum = int(form["mydrop"].value))
+        if num_updated != 1 and DEBUG:
+            print "Error updating puzzle number"
+            raise web.seeother('/admin?status=Error')
+
+        #TODO: Change all the flags sha256(sc# + agent)[:10]
+
         SHADOWCASTER = int(form["mydrop"].value)
-        config["SHADOWCASTER"] = SHADOWCASTER
         STUNNED = False
         STUNTIME = 0
-        with open("scconfig.json", "w") as f:
-            f.write(json.dumps(config))
-            f.close()
+
         raise web.seeother('/admin?status=Success')
 
 
@@ -370,12 +575,13 @@ class setStunTime:
         form = setStunTimeForm()
         if not form.validates():
             raise web.seeother('/admin?status=Not a number')
-            # return render.admin(SHADOWCASTER, puzzlenumForm, testLightsForm, setStunTimeForm, COLOR, "ERROR: Not a number.")
+
         STUNDURATION = int(form["time"].value)
-        config["STUNDURATION"] = STUNDURATION
-        with open("scconfig.json", "w") as f:
-            f.write(json.dumps(config))
-            f.close()
+        num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), stun = STUNDURATION)        
+        if num_updated != 1 and DEBUG:
+            print "Error updating stun duration"
+            raise web.seeother('/admin?status=Error')      
+
         raise web.seeother('/admin?status=Success')
 
 
@@ -385,12 +591,13 @@ class setReleaseTime:
         form = setReleaseTimeForm()
         if not form.validates():
             raise web.seeother('/admin?status=Not a number')
-            # return render.admin(SHADOWCASTER, puzzlenumForm, testLightsForm, setStunTimeForm, COLOR, "ERROR: Not a number.")
+
         RELEASEDURATION = int(form["time"].value)
-        config["RELEASEDURATION"] = RELEASEDURATION
-        with open("scconfig.json", "w") as f:
-            f.write(json.dumps(config))
-            f.close()
+        num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), release = RELEASEDURATION)        
+        if num_updated != 1 and DEBUG:
+            print "Error updating stun duration"
+            raise web.seeother('/admin?status=Error')          
+
         raise web.seeother('/admin?status=Success')
 
 
@@ -400,18 +607,38 @@ class setEnergyLevel:
         form = setEnergyLevelForm()
         if not form.validates():
             raise web.seeother('/admin?status=Not a number')
-            # return render.admin(SHADOWCASTER, puzzlenumForm, testLightsForm, setStunTimeForm, COLOR, "ERROR: Not a number.")
+
         ENERGY = int(form["level"].value)
-        config["ENERGY"] = ENERGY
-        with open("scconfig.json", "w") as f:
-            f.write(json.dumps(config))
-            f.close()
+        setColor()
+        num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), energy = ENERGY)        
+        if num_updated != 1 and DEBUG:
+            print "Error updating energy level"
+            raise web.seeother('/admin?status=Error')  
+
         raise web.seeother('/admin?status=Success')
 
 
 class admin:
 
     def GET(self):
+        # Is the user logged in?
+        if not session.get('logged_in'):
+            raise web.seeother('/login')
+
+        user = session.get('user')
+        #Has the agent already solved the challenge?
+        vars = dict(agent=user)
+        try:
+            result = db.select('agents', where="agent = $agent", vars=vars, limit=1)
+            agent = dict(result[0])
+        except Exception as e:
+            if DEBUG:
+                print "User not in database."
+            raise web.seeother('/login')
+
+        if agent["admin"] != 1:
+            raise web.seeother('/login')
+
         data = web.input(status="")
         status = str(data.status)
         puzzlenumForm["mydrop"].value = str(SHADOWCASTER)
@@ -421,234 +648,96 @@ class admin:
         return render.admin(SHADOWCASTER, puzzlenumForm, setEnergyLevelForm, setStunTimeForm, setReleaseTimeForm, testReleaseForm, testStunForm, COLOR, status)
 
 
-class login:
-    global db
-
-    loginForm = form.Form(
-        form.Textbox("user",
-                     form.notnull,
-                     pre="<div class='concernForm'><font color=white><b>Agent ID:</b></div>",
-                     description=""),
-        form.Password("password",
-                      form.notnull,
-                      pre="<div class='concernForm'><font color=white><b>Password:</b></div>",
-                      description=""),
-        form.Button("Login",
-                    description="Login",
-                    style="font-family: Quantico; font-size: 30px;"))
-
-    def GET(self):
-        global COLOR
-        global STUNNED
-        global STUNTIME
-
-        # If we have a logged in user, redirect them to the puzzle
-        if session.get('logged_in'):
-            raise web.seeother('/sc')
-
-        # else, have them login
-        return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "")
-
-    def POST(self):
-        form = self.loginForm()
-
-        if not form.validates():
-            return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "XXX")
-
-        user = str(form.d.user).lower()
-        password = form.d.password
-
-        # Is it a valud user
-        if user not in db or password != db[user]["password"]:
-            return render.login(self.loginForm(), STUNTIME, SHADOWCASTER, COLOR, "XXX")
-        if db[user]["solved"][str(config["SHADOWCASTER"])]:
-            return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
-
-        session.logged_in = True
-        session.user = user
-
-        raise web.seeother('/sc')
 
 
-class logout:
-    global db
 
-    def GET(self):
-
-        session.logged_in = False
-        session.user = ""
-        session.kill()
-        if DEBUG:
-            for key in db["znjp"]["solved"]:
-                db["znjp"]["solved"][key] = False
-            sync_db()
-        referer = web.ctx.env.get('HTTP_REFERER', '/')
-        raise web.seeother("/")
-
-
-class sc:
-    global db
-    global STUNNED
-    global ENERGY
-    global COLOR
-
-    def GET(self):
-        # Is the user logged in?
-        if not session.get('logged_in'):
-            raise web.seeother('/login')
-
-        user = session.get('user')
-        if db[user]["solved"][str(config["SHADOWCASTER"])]:
-            return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released")
-
-        print "SC", SHADOWCASTER
-
-        if SHADOWCASTER == 1:
-            return render.intswitch(STUNTIME)
-        elif SHADOWCASTER == 2:
-            return render.hexswitch(STUNTIME)
-        elif SHADOWCASTER == 3:
-            return render.dragdropone(STUNTIME)
-        elif SHADOWCASTER == 4:
-            return render.dragdroptwo(STUNTIME)
-        elif SHADOWCASTER == 5:
-            return render.toggleone(STUNTIME)
-        elif SHADOWCASTER == 6:
-            return render.toggletwo(STUNTIME)
-        elif SHADOWCASTER == 7:
-            return render.simon(STUNTIME)
-        elif SHADOWCASTER == 8:
-            return render.sc8(STUNTIME)
-        elif SHADOWCASTER == 9:
-            return render.eqnswitch(STUNTIME)
-        elif SHADOWCASTER == 10:
-            return render.picture(STUNTIME)
-        elif SHADOWCASTER == 11:
-            return render.logicGrid(STUNTIME)
-
-        return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "error: no puzzle")
+# def init_users():
+#     global db
+#     # Generate user logins and flags
+#     config["TOTALPUZZLES"]
+#     db["znjp"] = {"password": "brak4pres", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#                 "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'znjp'), "admin": True}
+#     db["alpha"] = {"password": "ZnTkHA", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#                 "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'aplha'), "admin": False}
+#     db["bravo"] = {"password": "dTdRtLY", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#                 "flag": hashlib.sha1("bravo" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
+#     db["charlie"] = {"password": "dZUokZ", "solved": db_build_helper_for_solved_status(
+#         config["TOTALPUZZLES"]), "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'charlie'), "admin": False}
+#     db["delta"] = {"password": "HewLwZ", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#                 "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'delta'), "admin": False}
+#     db["echo"] = {"password": "pRhzpa", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#                 "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'echo'), "admin": False}
+#     db["foxtrot"] = {"password": "djUTAm", "solved": db_build_helper_for_solved_status(
+#         config["TOTALPUZZLES"]), "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'foxtrot'), "admin": False}
+#     db["golf"] = {"password": "DMTBQa", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#                 "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'golf'), "admin": False}
+#     db["hotel"] = {"password": "xokRDs", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#                 "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'hotel'), "admin": False}
+#     db["india"] = {"password": "PZEUXn", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#                 "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'india'), "admin": False}
+#     db["juliet"] = {"password": "gKZFQr", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#                     "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'juliet'), "admin": False}
+#     db["1"] = {"password": "1", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#             "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], '1'), "admin": False}
+#     db["2"] = {"password": "2", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
+#             "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], '2'), "admin": False}
+#     sync_db()
+#     return
 
 
-class stun:
-    def GET(self):
-        # threading.Thread(target=stunLights).start()
-        return "<html><body><center><form method='POST' action='/stun'><input type='submit' style='height:500px;width:500px' value='Stun!'></form></center></body></html>"
-
-    def POST(self):
-        threading.Thread(target=stunLights).start()
-        referer = web.ctx.env.get('HTTP_REFERER', '/')
-        raise web.seeother(referer)
+# def db_build_helper_for_solved_status(numOfPuzzles):
+#     # assumes shadowcaster index starts at 1
+#     toReturn = dict()
+#     for i in range(1, numOfPuzzles + 1):
+#         toReturn[str(i)] = False
+#     return toReturn
 
 
-class unstun:
-    def GET(self):
-        global STUNNED
-        global STUNTIME
-        STUNNED = False
-        STUNTIME = 0
-        return "Unstunned!"
-
-    def POST(self):
-        global STUNNED
-        global STUNTIME
-        STUNNED = False
-        STUNTIME = 0
-        web.seeother('/admin')
+# def db_build_helper_for_flag_gen(numOfPuzzles, username):
+#     # assumes shadowcaster index starts at 1
+#     toReturn = dict()
+#     for i in range(1, numOfPuzzles + 1):
+#         toReturn[str(i)] = hashlib.sha1(
+#             username + "sc" + str(SHADOWCASTER)).hexdigest()
+#     return toReturn
 
 
-class stunstatus:
-    def GET(self):
-        global STUNNED
-        return STUNNED
-
-
-def init_users():
-    global db
-    # Generate user logins and flags
-    config["TOTALPUZZLES"]
-    db["znjp"] = {"password": "brak4pres", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-                  "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'znjp'), "admin": True}
-    db["alpha"] = {"password": "ZnTkHA", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'aplha'), "admin": False}
-    db["bravo"] = {"password": "dTdRtLY", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-                   "flag": hashlib.sha1("bravo" + "sc" + str(SHADOWCASTER)).hexdigest(), "admin": False}
-    db["charlie"] = {"password": "dZUokZ", "solved": db_build_helper_for_solved_status(
-        config["TOTALPUZZLES"]), "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'charlie'), "admin": False}
-    db["delta"] = {"password": "HewLwZ", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'delta'), "admin": False}
-    db["echo"] = {"password": "pRhzpa", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-                  "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'echo'), "admin": False}
-    db["foxtrot"] = {"password": "djUTAm", "solved": db_build_helper_for_solved_status(
-        config["TOTALPUZZLES"]), "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'foxtrot'), "admin": False}
-    db["golf"] = {"password": "DMTBQa", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-                  "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'golf'), "admin": False}
-    db["hotel"] = {"password": "xokRDs", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'hotel'), "admin": False}
-    db["india"] = {"password": "PZEUXn", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-                   "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'india'), "admin": False}
-    db["juliet"] = {"password": "gKZFQr", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-                    "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], 'juliet'), "admin": False}
-    db["1"] = {"password": "1", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-               "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], '1'), "admin": False}
-    db["2"] = {"password": "2", "solved": db_build_helper_for_solved_status(config["TOTALPUZZLES"]),
-               "flag": db_build_helper_for_flag_gen(config["TOTALPUZZLES"], '2'), "admin": False}
-    sync_db()
-    return
-
-
-def db_build_helper_for_solved_status(numOfPuzzles):
-    # assumes shadowcaster index starts at 1
-    toReturn = dict()
-    for i in range(1, numOfPuzzles + 1):
-        toReturn[str(i)] = False
-    return toReturn
-
-
-def db_build_helper_for_flag_gen(numOfPuzzles, username):
-    # assumes shadowcaster index starts at 1
-    toReturn = dict()
-    for i in range(1, numOfPuzzles + 1):
-        toReturn[str(i)] = hashlib.sha1(
-            username + "sc" + str(SHADOWCASTER)).hexdigest()
-    return toReturn
-
-
-def load_db(db_path):
-    global db
-    # Load any saved progress
-    try:
-        f = open(db_path)
-        db = pickle.load(f)
-        f.close()
-        # Saved progress is overated
-        # os.remove(db_path)
-        # init_users()
-        if DEBUG:
-            print "LOAD DB", db
-    except:
-        if DEBUG:
-            print "Error loading database. Creating a new one."
-        init_users()
-        return
+# def load_db(db_path):
+#     global db
+#     # Load any saved progress
+#     try:
+#         f = open(db_path)
+#         db = pickle.load(f)
+#         f.close()
+#         # Saved progress is overated
+#         # os.remove(db_path)
+#         # init_users()
+#         if DEBUG:
+#             print "LOAD DB", db
+#     except:
+#         if DEBUG:
+#             print "Error loading database. Creating a new one."
+#         init_users()
+#         return
 
     # init_users()
 
 
-def sync_db():
-    global db
-    global last_sync
+# def sync_db():
+#     global db
+#     global last_sync
 
-    now = time.time()
+#     now = time.time()
 
-    # Write DB every 5 seconds
-    if (now - last_sync) > 5:
-        if DEBUG:
-            print "SYNCHING!"
+#     # Write DB every 5 seconds
+#     if (now - last_sync) > 5:
+#         if DEBUG:
+#             print "SYNCHING!"
 
-        f = open("./password.db", "wb")
-        pickle.dump(db, f)
-        f.close()
-        last_sync = now
+#         f = open("./password.db", "wb")
+#         pickle.dump(db, f)
+#         f.close()
+#         last_sync = now
 
 
 def notfound():
@@ -658,7 +747,7 @@ def notfound():
 
 if __name__ == "__main__":
     app.notfound = notfound
-    load_db("./password.db")
+    #load_db("./password.db")
     if not NOGPIO:
         init_leds()
     app.run()
