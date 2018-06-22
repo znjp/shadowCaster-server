@@ -1,0 +1,22 @@
+$def with (agents)
+<html><head>
+    <link href='https://fonts.googleapis.com/css?family=Quantico' rel='stylesheet'>
+    <style>
+        .concern {
+            text-align: center;
+            color: rgb(0, 0, 0);
+            font-size: 40px;
+            font-family: 'Quantico'
+        }
+    </style>
+    <script>window.print()</script>
+<title>Agent Login</title></head><body>
+    $for agent in agents:
+        <br>&nbsp;</br><br>&nbsp;</br><br>&nbsp;</br><br>&nbsp;</br><br>&nbsp;</br>
+        <center><img src='/static/cube.png' height=200 align=center>
+        <h1><div class="concern"><font color=red>$agent.agent</font></div></h1>
+        <h1><div class="concern">[$agent.password]</div></h1></center>
+        <!--<div class="page-break">&nbsp;</div>-->
+        <p style="page-break-after: always;">&nbsp;</p>
+        <!--<p style="page-break-before: always;">&nbsp;</p>-->
+</body></html>
