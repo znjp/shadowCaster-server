@@ -6,68 +6,81 @@
   color: #F5F5F5;
   align-content: center;
   font-family: 'Quantico';
+  word-wrap: break-word;
 }
 
 table {
   padding: 0px;
-  /* table-layout: fixed; */
-  width: 45vw;
-  height: 50vh;
+  /* height: 55vw;
+  width: 55vw; */
+  margin:auto;
 }
 
 tr {
   padding: 0px;
 }
 
-th {
+td.header {
   background-color: #F5F5F5;
   color: black;
-  padding: 2vw;
-  /* word-wrap: break-word; */
+  font-size:3vh;
+  padding: 0.5vh;
+  padding-left: 0.5vw;
+  padding-right:0.5vw;
 }
 
 td {
   border: 1px solid #F5F5F5;
-  /*padding-top: 2vh;
-  padding-bottom: 2vh;
-  padding-left: 1.5vw;
-  padding-right: 1.5vw;*/
-  padding:0px;
+  padding:5px;
   word-wrap: break-word;
+  font-size:1.5vw;
+  width: 9vw;
+  height: 9vw;
 }
 
 .hidden {
-  visibility:hidden
+  border-color: black;
 }
 
 .selected div {
   background-color: rgb(65, 222, 65);
+
 }
 
-.deselected div {
+.deselected div{
   background-color: rgb(218, 46, 46);
 }
 
 .game {
 	display: inline-block;
-	width: 5vw;
-	height: 5vw;
+	width: 70%;
+	height: 70%;
 	padding: 0px;
-}
-
-.pseudoHeader {
-	font-weight: bold;
-	padding:0.25vw;
+	border-radius: 500000vh;
+  /* background-color: pink; */
 }
 
 h1 {
-  padding: 2vh;
+  padding: 2vw;
 }
 
 #clues {
   width: 45vw;
-  text-align: left;
+  font-size: 2vw;
   padding: 2vh;
+  margin: auto;
+}
+
+#clues2 {
+  width: 45vw;
+  font-size: 2vw;
+  padding: 2vh;
+  margin: auto;
+  text-align: left;
+}
+
+div.clue p {
+  text-align: left;
 }
 
 ol {
@@ -75,4 +88,42 @@ ol {
 }
 li {
     text-align: left;
+}
+.invisible {
+	display: none;
+}
+h3 {
+  padding-bottom: 1vh;
+  font-size: 2vw;
+}
+
+.pseudoHeader.blue {
+  color: #3399ff;
+}
+
+.pseudoHeader.pink {
+  color: #ff99ff;
+}
+
+.pseudoHeader.grey {
+  color: #d1d1d1;
+}
+
+.pseudoHeader.yellow {
+  color: #ffcc00;
+}
+.blue {
+  color: #3399ff;
+}
+
+.pink {
+  color: #ff99ff;
+}
+
+.grey {
+  color: #d1d1d1;
+}
+
+.yellow {
+  color: #ffcc00;
 }

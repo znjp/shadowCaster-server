@@ -707,8 +707,8 @@ class admin:
         setStunTimeForm["time"].value = str(STUNDURATION)
         setReleaseTimeForm["time"].value = str(RELEASEDURATION)
         setEnergyLevelForm["level"].value = str(ENERGY)
+        
         return render.admin(SHADOWCASTER, puzzlenumForm, setEnergyLevelForm, setStunTimeForm, setReleaseTimeForm, testReleaseForm, testStunForm, printTeamsForm, COLOR, status)
-
 
 
 def notfound():

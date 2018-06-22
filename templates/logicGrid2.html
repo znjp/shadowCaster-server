@@ -83,50 +83,54 @@ $def with (stunned)
     <table>
       <tr>
         <td colspan="2" rowspan="2" class="hidden"></td>
-        <td colspan="4" class="header">Agent</th>
+        <td colspan="4" class="header">Agent ID</th>
       </tr>
       <tr>
-        <td class='pseudoHeader'>Peters</td>
-        <td class='pseudoHeader'>Sonne</td>
-        <td class='pseudoHeader'>Gonella</td>
-        <td class='pseudoHeader'>Frost</td>
+        <td class='pseudoHeader'>0</td>
+        <td class='pseudoHeader'>1</td>
+        <td class='pseudoHeader'>2</td>
+        <td class='pseudoHeader'>3</td>
       </tr>
       <tr>
-        <td rowspan="4" class="header">Energy Retrieved</th>
-        <td class='pseudoHeader'>20%</td>
+        <td rowspan="4" class="header">Color</th>
+        <td class='pseudoHeader yellow'>Yellow</td>
         <td class="col0 row0" id='0'><div class='game'></div></td>
         <td class="col1 row0" id='1'><div class='game'></div></td>
         <td class="col2 row0" id='2'><div class='game'></div></td>
         <td class="col3 row0" id='3'><div class='game'></div></td>
       </tr>
       <tr>
-        <td class='pseudoHeader'>15%</td>
+        <td class='pseudoHeader grey'>Grey</td>
         <td class="col0 row1" id='4'><div class='game'></div></td>
         <td class="col1 row1" id='5'><div class='game'></div></td>
         <td class="col2 row1" id='6'><div class='game'></div></td>
         <td class="col3 row1" id='7'><div class='game'></div></td>
       </tr>
       <tr>
-        <td class='pseudoHeader'>10%</td>
+        <td class='pseudoHeader blue'>Blue</td>
         <td class="col0 row2" id='8'><div class='game'></div></td>
         <td class="col1 row2" id='9'><div class='game'></div></td>
         <td class="col2 row2" id='10'><div class='game'></div></td>
         <td class="col3 row2" id='11'><div class='game'></div></td>
       </tr>
       <tr>
-        <td class='pseudoHeader'>5%</td>
+        <td class='pseudoHeader pink'>Pink</td>
         <td class="col0 row3" id='12'><div class='game'></div></td>
         <td class="col1 row3" id='13'><div class='game'></div></td>
 	      <td class="col2 row3" id='14'><div class='game'></div></td>
         <td class="col3 row3" id='15'><div class='game'></div></td>
       </tr>
     </table>
-    <div id='clues'>
-      <ol>
-        <li>Agent Peters is more efficient than Agent Sonne.</li>
-        <li>Agent Frost is the most efficient.</li>
-        <li>Agent Sonne is only 5% less effective than Agent Gonella.</li>
-      </ol>
+    <div id='clues2' class="clue">
+      <p text-align="left">
+        &lpar;<strong class="grey">Grey</strong> &amp;&amp; 1&rpar; 	&equals; true<br>
+        if &lpar;<strong class="yellow">Yellow</strong> &amp;&amp; 1&rpar; &lcub;<br>
+        &emsp; &lpar;<strong class="blue">Blue</strong> &amp;&amp; 3&rpar; &equals; &lpar;<strong class="grey">Grey</strong> &amp;&amp; 1&rpar;<br>
+        &rcub; else &lcub;<br>
+        &emsp; &lpar;<strong class="pink">Pink</strong> &amp;&amp; 0&rpar; &equals; &excl;&lpar;<strong class="yellow">Yellow</strong> &amp;&amp; 1&rpar;<br>
+        &rcub;<br>
+        &lpar;<strong class="yellow">Yellow</strong> &amp;&amp; 2&rpar; &equals; &excl;&lpar;<strong class="pink">Pink</strong> &amp;&amp; 0&rpar;
+      </p>
     </div>
-    <script src="../static/logicGrid.js"></script>
+    <script src="../static/logicGrid2.js"></script>
   </body>
