@@ -1,4 +1,4 @@
-$def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, setReleaseTimeForm, testReleaseForm, testStunForm, color, status)
+$def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, setReleaseTimeForm, testReleaseForm, testStunForm, printTeamsForm, color, status)
 
 <html>
 	<head><title>ShadowCaster Admin</title>
@@ -24,7 +24,6 @@ $def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, 
 				font-family: 'Quantico'
 			 }
 		</style>
-
 	</head>
 	<body bgcolor="black">
 		<center>
@@ -37,7 +36,7 @@ $def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, 
                 <tr>
                     <td width=300 align=center>
                         <div class='concernForm'><b>Change SC #:<b></div>
-                        <form action="/setPuzzleNum" name="puzzleNum" method="post">
+                        <form onsubmit="return confirm('This will reset solved states. Do you want to continue?');" action="/setPuzzleNum" name="puzzleNum" method="post">
                             $if puzzlenumberform:
                                 <center>
                                 $:puzzlenumberform.render()
@@ -90,6 +89,16 @@ $def with (puzzlenumber, puzzlenumberform, setEnergyLevelForm, setStunTimeForm, 
                                 $if testStunForm:
                                     <center>
                                     $:testStunForm.render()
+                                    </center>
+
+                            </form>
+                        </td>
+                    <td width=300>
+                            <form action="/printTeams" name="printTeams" method="get">
+                                <div class='concernForm'><b>Print Team Logins:<b></div>
+                                $if printTeamsForm:
+                                    <center>
+                                    $:printTeamsForm.render()
                                     </center>
 
                             </form>

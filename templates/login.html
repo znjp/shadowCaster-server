@@ -1,4 +1,4 @@
-$def with (form, stunned, num, color, error)
+$def with (form, stunned, num, color, error, flag)
 
 <html>
 	<head><title>ShadowCaster Login</title>
@@ -11,6 +11,12 @@ $def with (form, stunned, num, color, error)
 				font-family: 'Quantico'
 			}
 			.concern{
+				text-align: center;
+				color: rgb(255, 255, 255);
+				font-size: 40px;
+				font-family: 'Quantico'
+			}
+			.flag {
 				text-align: center;
 				color: rgb(255, 255, 255);
 				font-size: 40px;
@@ -74,6 +80,8 @@ $def with (form, stunned, num, color, error)
 			</form>
 			$if error != "":
 				<p><div class="concern"> $error </div></p>
+			$if flag:
+				<p><div class="flag">[ $flag ]</div></p>
 
 		</center>
 	</body>

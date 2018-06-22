@@ -3,42 +3,52 @@
 # TODO
 
 ## High Priority
-1. Refactor JS code to have a shadowcaster library
+- Refactor JS code to have a shadowcaster library
 
-2. <strike>Simon: touch feedback</strike>
+- <strike>Simon: touch feedback</strike>
 
-3. <strike>Toggles: make work for all mobile</strike>
+- <strike>Toggles: make work for all mobile</strike>
 
-4. <strike>Switches: Make them circles</strike>
+- <strike>Switches: Make them circles</strike>
 
-5. <strike>fix 9</strike>
+- <strike>fix 9</strike>
 
-6. New puzzles
+- <strike>when changing shadowcaster # reset the database, including recomputing flags</strike>
 
 ### Low to Medium Priority
-- Shorter flags, in case copy and paste doesn't work
+- <strike>Shorter flags, in case copy and paste doesn't work</strike>
 
-- Reveal flag on "you've already released this flag" page
+- <strike>Reveal flag on "you've already released this flag" page </strike>
 
 - More points for early solves
 
+- Create a flag generation scheme that can't be solved through code inspection
+
 - Refactor to remove JavaScript processing
 
-- I solved SC5, then visited SC6 and it said it had already been solved. Look into this.
+- <strike>I solved SC5, then visited SC6 and it said it had already been solved. Look into this.</strike>
+
+- Look into a hash function whose domain is english words (or write our own)
+
+
+## New Puzzle Ideas
+- Lights Out
+- "plug board" substitution cipher
 
 #### To Categorize
 ##### Admin Interface for SC
- <strike>- Create a web interface for changing the shadowcaster puzzle number</strike>
- <strike> - Adjust the energy levels</strike>
- <strike> - Stun and flag duration</strike>
- <strike> - test LEDs; Get GPIO status</strike>
+ - <strike> Create a web interface for changing the shadowcaster puzzle number</strike>
+ - <strike> Adjust the energy levels</strike>
+ - <strike> Stun and flag duration</strike>
+ - <strike> test LEDs; Get GPIO status</strike>
  - Add/remove teams; change password
- - template for printing out team credentials
+ - <strike> template for printing out team credentials </strike>
  - Single button to Reset everything (all solves, energy levels) for new game
+ - <strike> changing sc number resets all flags and sloved status </strike>
 
 ##### Real DB integration
- - teams
- - sc settings
+ - <stirke> teams</strike>
+ - <strike>sc settings</strike>
 
 ##### Scoreboard integration
  - Have a way to configure the auto submitting of flags if the SC's can have internet access
@@ -50,7 +60,7 @@
 **Running the Game**
 - Rotate SA locations (inside/outside) if it's cold
 - Make sure there are places to hide around SC locations
-- Stunning maybe takes points away
+- Stunning maybe takes points away?
 - Glow sticks for SAs
 - Explain the rules of flag submitting
 - More points for early solves (motivate splitting up/working independently)

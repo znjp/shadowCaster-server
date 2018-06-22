@@ -22,10 +22,11 @@ admin INTEGER);"""
 try:
     cursor.execute(sql_command)
     for agent in agents:
-        password = hashlib.sha256(agent + secret).hexdigest()[:8]
+        password = hashlib.sha256(agent).digest().encode("base64")[:8]
+        flag = hashlib.sha256("sc1"+agent).digest().encode("base64")[:10]
         format_str = """INSERT INTO agents (agent, password, solved, flag, admin)
-	    VALUES ("{agent}", "{password}" , 0, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", 0);"""
-        sql_command = format_str.format(agent=agent, password=password)
+	    VALUES ("{agent}", "{password}" , 0, "{flag}", 0);"""
+        sql_command = format_str.format(agent=agent, password=password, flag=flag)
         cursor.execute(sql_command)
 except Exception as e:
     print "Failed to create agents table: ", str(e) 
@@ -35,6 +36,9 @@ print "Done."
 sql_command = """INSERT INTO agents (agent, password, solved, flag, admin)
 VALUES ("znjp", "brak4pres" , 0, "flag", 1);"""
 cursor.execute(sql_command)
+sql_command = """INSERT INTO agents (agent, password, solved, flag, admin)
+VALUES ("admin", "admin" , 0, "flag", 1);"""
+#cursor.execute(sql_command)
 
 print "AGENTS"
 cursor.execute("SELECT * FROM agents")
