@@ -1,0 +1,104 @@
+$def with (stunned)
+<html>
+	<head><title>shadowCaster admin</title>
+		<link href='/static/font.css' rel='stylesheet'>
+		<style>
+				.concern {
+					text-align: center;
+					color: rgb(255, 255, 255);
+					font-size: 20px;
+					font-family: 'Quantico'
+				}
+				.concern:link{
+					color: red;
+				};
+				.concern:visited{
+					color: red; 
+				}
+		</style>
+		<meta charset="utf-8" />
+		<script type="text/javascript">
+			function sleep(ms) {
+			return new Promise(resolve => setTimeout(resolve, ms));
+			}
+
+			function flash() {
+				setInterval(f, (Math.random() * 2000));
+			}
+
+			async function f(){
+				for(i=0; i < (Math.random() * 16); i++){
+					document.getElementById("logo").src = "/static/red.png";
+					await sleep(50);
+					document.getElementById("logo").src = "/static/white.png";
+					await sleep(50);
+				}
+			}
+			var oReq;
+			function stunReqListener () {
+				//console.log(this.responseText);
+				if(this.responseText == "True"){window.location.reload(1);}
+			}
+			function makeStunRequest(){
+				oReq = new XMLHttpRequest();
+				oReq.addEventListener("load", stunReqListener);
+				oReq.open("GET", "/stunstatus");
+				oReq.send();
+			}	
+			
+        </script>
+        <style>
+            td {
+                text-align: center;
+            }
+            td.tools {
+                vertical-align: top;
+            }
+            table.toolbox tr td {
+                border-width: medium thin;
+                border-color: #B4D0DC;
+                border-style: solid;
+                padding: 1px 1px;
+                background-color: #ECF8FF;
+            }
+        </style>
+        <script type="text/javascript">
+            var width = 5;
+            var height = 5;
+            var puzzle = "  ####    # #  #   ## ###";
+            var curpuz = puzzle;
+            function puzzleDone() {}
+        </script>
+        <script type="text/javascript" src="/static/lightsout.js"></script>
+        </head>
+	<body bgcolor="black" onload="initLightsOutGrid()">
+
+		<center>
+		$if stunned > 0:
+			<img id="logo" width=300 src="/static/red.png" onload=flash()>
+			<div class="concern" id="timer">STUNNED</div>
+			<script src="/static/timer.js"></script>
+			<script>
+				setTimer(document.getElementById("timer"), $(stunned) );
+				setTimeout(function(){window.location.reload(1);}, 5000);			
+			</script>
+		$else:
+			<script>setInterval(makeStunRequest, 5000);</script>
+			<div id="gameArea">
+					<p style="margin-bottom: 5cm"></p>
+					<br /><br /><br /><br /><br />
+                    <div id="container">
+                        <table><tr><td class="tools">
+                        <br />
+                        <br />
+                        </td>
+                        <td style="width: 20px;">&nbsp;</td>
+                        <td colspan="3" id="contain"></td>
+						</tr>
+                        </table>
+                    </div>
+			</div>				
+		</center>
+
+	</body>
+</html>

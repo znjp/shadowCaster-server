@@ -156,7 +156,7 @@ function changeBoard(id) {
     cleanBoard();
     if (clrBoard() == 4) {
       if (boardSetup[3] && boardSetup[5] && boardSetup[10] && boardSetup[12]) {
-        document.location = "/release?e=884fd191a2f3809cdf2fd57843571f5e95f6b605";
+        document.location = "/release?e=c03144f689169c6f829f920613285ca58a4ab9bd";
       } else {
         losing = false;
         alert("Incorrect deduction.\r\nYou must pause to let the shadowcasters pass.");

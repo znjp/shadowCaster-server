@@ -77,56 +77,58 @@ $def with (stunned)
     $else:
       <script>setInterval(makeStunRequest, 5000);</script>
 
-    <h1>Unknown Agents</h1>
-    <!-- <h3 id='timing' class='hidden'>5.0</h3> -->
-    <h3 id='timing'></h3>
-    <table>
-      <tr>
-        <td colspan="2" rowspan="2" class="hidden"></td>
-        <td colspan="4" class="header">Agent</th>
-      </tr>
-      <tr>
-        <td class='pseudoHeader'>Peters</td>
-        <td class='pseudoHeader'>Sonne</td>
-        <td class='pseudoHeader'>Gonella</td>
-        <td class='pseudoHeader'>Frost</td>
-      </tr>
-      <tr>
-        <td rowspan="4" class="header">Energy Retrieved</th>
-        <td class='pseudoHeader'>20%</td>
-        <td class="col0 row0" id='0'><div class='game'></div></td>
-        <td class="col1 row0" id='1'><div class='game'></div></td>
-        <td class="col2 row0" id='2'><div class='game'></div></td>
-        <td class="col3 row0" id='3'><div class='game'></div></td>
-      </tr>
-      <tr>
-        <td class='pseudoHeader'>15%</td>
-        <td class="col0 row1" id='4'><div class='game'></div></td>
-        <td class="col1 row1" id='5'><div class='game'></div></td>
-        <td class="col2 row1" id='6'><div class='game'></div></td>
-        <td class="col3 row1" id='7'><div class='game'></div></td>
-      </tr>
-      <tr>
-        <td class='pseudoHeader'>10%</td>
-        <td class="col0 row2" id='8'><div class='game'></div></td>
-        <td class="col1 row2" id='9'><div class='game'></div></td>
-        <td class="col2 row2" id='10'><div class='game'></div></td>
-        <td class="col3 row2" id='11'><div class='game'></div></td>
-      </tr>
-      <tr>
-        <td class='pseudoHeader'>5%</td>
-        <td class="col0 row3" id='12'><div class='game'></div></td>
-        <td class="col1 row3" id='13'><div class='game'></div></td>
-	      <td class="col2 row3" id='14'><div class='game'></div></td>
-        <td class="col3 row3" id='15'><div class='game'></div></td>
-      </tr>
-    </table>
-    <div id='clues'>
-      <ol>
-        <li>Agent Peters is more efficient than Agent Sonne.</li>
-        <li>Agent Frost is the most efficient.</li>
-        <li>Agent Sonne is only 5% less effective than Agent Gonella.</li>
-      </ol>
-    </div>
-    <script src="../static/logicGrid.js"></script>
+      <br />
+      <br />
+      <br />
+      <!-- <h3 id='timing' class='hidden'>5.0</h3> -->
+      <h3 id='timing'></h3>
+      <table>
+        <tr>
+          <td colspan="2" rowspan="2" class="hidden"></td>
+          <td colspan="4" class="header">Agent</th>
+        </tr>
+        <tr>
+          <td class='pseudoHeader'>Peters</td>
+          <td class='pseudoHeader'>Sonne</td>
+          <td class='pseudoHeader'>Gonella</td>
+          <td class='pseudoHeader'>Frost</td>
+        </tr>
+        <tr>
+          <td rowspan="4" class="header">Energy Retrieved</th>
+          <td class='pseudoHeader'>20%</td>
+          <td class="col0 row0" id='0'><div class='game'></div></td>
+          <td class="col1 row0" id='1'><div class='game'></div></td>
+          <td class="col2 row0" id='2'><div class='game'></div></td>
+          <td class="col3 row0" id='3'><div class='game'></div></td>
+        </tr>
+        <tr>
+          <td class='pseudoHeader'>15%</td>
+          <td class="col0 row1" id='4'><div class='game'></div></td>
+          <td class="col1 row1" id='5'><div class='game'></div></td>
+          <td class="col2 row1" id='6'><div class='game'></div></td>
+          <td class="col3 row1" id='7'><div class='game'></div></td>
+        </tr>
+        <tr>
+          <td class='pseudoHeader'>10%</td>
+          <td class="col0 row2" id='8'><div class='game'></div></td>
+          <td class="col1 row2" id='9'><div class='game'></div></td>
+          <td class="col2 row2" id='10'><div class='game'></div></td>
+          <td class="col3 row2" id='11'><div class='game'></div></td>
+        </tr>
+        <tr>
+          <td class='pseudoHeader'>5%</td>
+          <td class="col0 row3" id='12'><div class='game'></div></td>
+          <td class="col1 row3" id='13'><div class='game'></div></td>
+          <td class="col2 row3" id='14'><div class='game'></div></td>
+          <td class="col3 row3" id='15'><div class='game'></div></td>
+        </tr>
+      </table>
+      <div id='clues'>
+        <ol>
+          <li>Agent Peters is more efficient than Agent Sonne.</li>
+          <li>Agent Frost is the most efficient.</li>
+          <li>Agent Sonne is only 5% less effective than Agent Gonella.</li>
+        </ol>
+      </div>
+      <script src="/static/logicGrid.js"></script>
   </body>

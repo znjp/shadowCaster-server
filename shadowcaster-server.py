@@ -11,6 +11,8 @@ import threading
 import signal
 import json
 import sqlite3
+import fileinput
+from subprocess import call
 
 
 # This line causes this script to be somewhat unresponsive to ctrl-C
@@ -218,7 +220,7 @@ def setColor():
     global ENERGY
     global COLOR
 
-    if ENERGY < 100 and ENERGY > 70:
+    if ENERGY <= 100 and ENERGY > 70:
         COLOR = "blue"
     if ENERGY < 70 and ENERGY > 30:
         COLOR = "green"
@@ -397,7 +399,9 @@ class sc:
         elif SHADOWCASTER == 10:
             return render.picture(STUNTIME)
         elif SHADOWCASTER == 11:
-            return render.logicGrid(STUNTIME)
+            return render.logicGrid2(STUNTIME)
+        elif SHADOWCASTER == 12:
+            return render.lightsout(STUNTIME)
 
         return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "error: no puzzle", None)
 
@@ -576,6 +580,7 @@ class setPuzzleNum:
         global SHADOWCASTER
         global STUNNED
         global STUNTIME
+        global ENERGY
 
         user = session.get('user')
         if not isAdmin(user):
@@ -587,15 +592,22 @@ class setPuzzleNum:
             raise web.seeother('/admin?status=Bad puzzle number')
 
         #Update the puzzle number.
-        num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), scnum = int(form["mydrop"].value))
+        num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), scnum = int(form["mydrop"].value), energy=100)
         if num_updated != 1 and DEBUG:
             print "Error updating puzzle number"
             raise web.seeother('/admin?status=Error')
+
+        SHADOWCASTER = int(form["mydrop"].value)
+        ENERGY=100
+        setColor()
+        STUNNED = False
+        STUNTIME = 0
 
         #Reset all solved states
         num_updated = db.query('UPDATE agents set solved = 0')
         if DEBUG:
             print "Updated", num_updated, "solved states."
+        
         #Change all the flags in the database sha256(sc# + agent).b64[:10]
         agents = db.select('agents')
         for agent in agents:
@@ -604,12 +616,6 @@ class setPuzzleNum:
             if num_updated != 1 and DEBUG:
                 print "Error updating agent flag for", agent["agent"]
                 raise web.seeother('/admin?status=Error')
-
-        #TODO: Rename wireless network
-
-        SHADOWCASTER = int(form["mydrop"].value)
-        STUNNED = False
-        STUNTIME = 0
 
         raise web.seeother('/admin?status=Success')
 
@@ -678,7 +684,6 @@ class setEnergyLevel:
         raise web.seeother('/admin?status=Success')
 
 class printTeams:
-
     def GET(self):
         user = session.get('user')
         if not isAdmin(user):
@@ -694,9 +699,7 @@ class printTeams:
         return render.teams(agents)
 
 class admin:
-
     def GET(self):
-
         user = session.get('user')
         if not isAdmin(user):
             raise web.seeother('/login')

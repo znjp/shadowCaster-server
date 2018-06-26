@@ -30,6 +30,8 @@
 
 - Look into a hash function whose domain is english words (or write our own)
 
+- Make puzzles simpler to integrate, or at least write some documentation on how to.
+
 
 ## New Puzzle Ideas
 - Lights Out
