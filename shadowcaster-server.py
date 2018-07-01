@@ -40,6 +40,7 @@ COLOR = "blue"  # Initial color
 
 # Global variables used for stunning
 STUNNED = False
+RELEASING = False
 STUNTIME = 0  # Stun time remaining
 
 # GPIO Settings
@@ -118,8 +119,10 @@ def init_leds(t=5):
 def releaseLights():
     global STUNNED
     global STUNTIME
+    global RELEASING
 
     STUNNED = True
+    RELEASING = True
     STUNTIME = RELEASEDURATION
     threading.Thread(target=countdown).start()
     now = time.time()
@@ -161,6 +164,7 @@ def releaseLights():
             GPIO.output(GREEN, False)
             GPIO.output(RED, False)
     STUNNED = False
+    RELEASING = False
 
 
 def countdown():
@@ -240,6 +244,7 @@ class release:
     def GET(self):
         global COLOR
         global ENERGY
+        global RELEASING
 
         if not session.get('logged_in'):
             if DEBUG:
@@ -257,8 +262,10 @@ class release:
                 print "User not in database:" + str(e)
             raise web.seeother('/login')
 
-        if agent["solved"] == 1:
+        if agent["solved"] == 1 and RELEASING == True:
             #return render.login(None, 0, SHADOWCASTER, COLOR, "agent light already released", agent["flag"])
+            return render.release(SHADOWCASTER, COLOR, False, agent["flag"])
+        if agent["solved"] == 1 and RELEASING == False:
             return render.release(SHADOWCASTER, COLOR, True, agent["flag"])
 
         # Get solved key and validate
@@ -362,6 +369,7 @@ class sc:
     global db
     global ENERGY
     global COLOR
+    global RELEASING
 
     def GET(self):
         # Is the user logged in?
@@ -380,8 +388,10 @@ class sc:
             raise web.seeother('/login')
 
         #Has the agent already solved the puzzle?
-        if agent["solved"] == 1:
-            return render.release(SHADOWCASTER, COLOR, True, agent["flag"])
+        if agent["solved"] == 1 and RELEASING == True:
+            return render.release(SHADOWCASTER, COLOR, False, agent["flag"])
+        if agent["solved"] == 1 and RELEASING == False:
+            return render.release(SHADOWCASTER, COLOR, True, agent["flag"])       
             #return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released", agent["flag"])
 
         if SHADOWCASTER == 1:
@@ -450,7 +460,9 @@ class unstun:
     def GET(self):
         global STUNNED
         global STUNTIME
+        global RELEASING
         STUNNED = False
+        RELEASING = False
         STUNTIME = 0
         referer = web.ctx.env.get('HTTP_REFERER', '/')
         raise web.seeother(referer)
@@ -458,7 +470,9 @@ class unstun:
     def POST(self):
         global STUNNED
         global STUNTIME
+        global RELEASING
         STUNNED = False
+        RELEASING = False
         STUNTIME = 0
         referer = web.ctx.env.get('HTTP_REFERER', '/')
         raise web.seeother(referer)
