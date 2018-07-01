@@ -39,7 +39,7 @@ $def with (num, color, solved, flag)
 	</head>
 	<body bgcolor="black">
 		<center>
-			$if solved:
+			$if solved == True:
 				<img id="logo" width=300 src="/static/$(color).png">
 				<div class="concern">shadowCaster $(num): <font color="white">agent light already released</font></div><p>
 			$else:

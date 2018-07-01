@@ -242,6 +242,8 @@ class release:
         global ENERGY
 
         if not session.get('logged_in'):
+            if DEBUG:
+                print "Not logged in."
             raise web.seeother('/login')
 
         #Get the user from the database
@@ -275,7 +277,6 @@ class release:
         num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), energy = ENERGY)        
         if num_updated != 1 and DEBUG:
             print "Error updating energy level"
-
 
         threading.Thread(target=releaseLights).start()
 
@@ -379,7 +380,7 @@ class sc:
             raise web.seeother('/login')
 
         #Has the agent already solved the puzzle?
-        if agent["solved"]:
+        if agent["solved"] == 1:
             return render.release(SHADOWCASTER, COLOR, True, agent["flag"])
             #return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released", agent["flag"])
 
