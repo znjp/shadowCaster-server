@@ -1,4 +1,4 @@
-$def with (num, flag)
+$def with (num, color, solved, flag)
 <html>
     <head><title>Release Energy</title>
         <link href='/static/font.css' rel='stylesheet'>
@@ -18,7 +18,7 @@ $def with (num, flag)
 		</style>
 		<script type="text/javascript">
 			function sleep(ms) {
-			return new Promise(resolve => setTimeout(resolve, ms));
+				return new Promise(resolve => setTimeout(resolve, ms));
 			}
 
 			function flash() {
@@ -39,9 +39,14 @@ $def with (num, flag)
 	</head>
 	<body bgcolor="black">
 		<center>
-			<img id="logo" width=300 src="/static/white.png" onload=flash()>
-            <div class="concern">shadowCaster $(num): releasing energy</div><p>
-            <div class="flag">[ $flag ]</div>
+			$if solved:
+				<img id="logo" width=300 src="/static/$(color).png">
+				<div class="concern">shadowCaster $(num): <font color="white">agent light already released</font></div><p>
+			$else:
+				<img id="logo" width=300 src="/static/white.png" onload=flash()>
+				<div class="concern">shadowCaster $(num): <font color="white">releasing light</font></div><p>
+			$if flag:
+				<p><div class="flag">[ $(flag) ]</div>
 		</center>
 
 	</body>

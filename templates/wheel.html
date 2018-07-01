@@ -1,0 +1,213 @@
+$def with (stunned)
+<html>
+	<head><title>shadowCaster admin</title>
+		<link href='/static/font.css' rel='stylesheet'>
+		<style>
+				.concern {
+					text-align: center;
+					color: rgb(255, 255, 255);
+					font-size: 20px;
+					font-family: 'Quantico'
+				}
+				.concern:link{
+					color: red;
+				};
+				.concern:visited{
+					color: red; 
+				}
+		</style>
+		<meta charset="utf-8" />
+		<script type="text/javascript">
+			function sleep(ms) {
+			return new Promise(resolve => setTimeout(resolve, ms));
+			}
+
+			function flash() {
+				setInterval(f, (Math.random() * 2000));
+			}
+
+			async function f(){
+				for(i=0; i < (Math.random() * 16); i++){
+					document.getElementById("logo").src = "/static/red.png";
+					await sleep(50);
+					document.getElementById("logo").src = "/static/white.png";
+					await sleep(50);
+				}
+			}
+			var oReq;
+			function stunReqListener () {
+				//console.log(this.responseText);
+				if(this.responseText == "True"){window.location.reload(1);}
+			}
+			function makeStunRequest(){
+				oReq = new XMLHttpRequest();
+				oReq.addEventListener("load", stunReqListener);
+				oReq.open("GET", "/stunstatus");
+				oReq.send();
+			}	
+			
+		</script>
+	</head>
+	<body bgcolor="black">
+		<center>
+		$if stunned > 0:
+			<img id="logo" width=300 src="/static/red.png" onload=flash()>
+			<div class="concern" id="timer">STUNNED</div>
+			<script src="/static/timer.js"></script>
+			<script>
+				setTimer(document.getElementById("timer"), $(stunned) );
+				setTimeout(function(){window.location.reload(1);}, 5000);			
+			</script>
+		$else:
+			<script>setInterval(makeStunRequest, 5000);</script>
+			<div id="gameArea">
+                    
+                
+                <script type="text/javascript" src="/static/jquery-1.6.3.js"></script>
+                <!-- <script type="text/javascript" src="jquery-1.6.3.js"></script>-->
+                
+
+                
+                <div id="wheelimg" style="margin-left: auto; margin-right: auto; width: 400px; height: 400px; background-image:url('/static/wheelsprite.png')"></div>
+                <!-- <div id="wheelimg" style="margin-left: auto; margin-right: auto; width: 400px; height: 400px; background-image:url('/static/wheelsprite.png')"></div>-->
+
+                <div id="letters" style="font-family: Quantico; color: red; margin-left: auto; margin-right: auto; white-space: nowrap; width: 800px;"><span id="shiftedLetters"></span><br />&nbsp;&nbsp;t &nbsp;h &nbsp;e &nbsp;  &nbsp;s &nbsp;h &nbsp;a &nbsp;d &nbsp;o &nbsp;w &nbsp;C &nbsp;o &nbsp;n &nbsp;c &nbsp;e &nbsp;r &nbsp;n &nbsp;R &nbsp;S &nbsp;T &nbsp;U &nbsp;V &nbsp;W &nbsp;X &nbsp;Y &nbsp;Z</div>
+
+                <!-- <div id="letters" style="font-family: Quantico; color: red; margin-left: auto; margin-right: auto; white-space: nowrap; width: 800px;"><span id="shiftedLetters"></span><br />&nbsp;&nbsp;A &nbsp;B &nbsp;C &nbsp;D &nbsp;E &nbsp;F &nbsp;G &nbsp;H &nbsp;I &nbsp;J &nbsp;K &nbsp;L &nbsp;M &nbsp;N &nbsp;O &nbsp;P &nbsp;Q &nbsp;R &nbsp;S &nbsp;T &nbsp;U &nbsp;V &nbsp;W &nbsp;X &nbsp;Y &nbsp;Z</div>-->
+                
+                
+                <script type="text/javascript">
+                startRotation = 0;
+                wheelIsRotating = false;
+                
+                function getAngle(e) {
+                    var wheeloffset = \$('#wheelimg').offset();
+                    var wheelwidth = \$('#wheelimg').width();
+                    var wheelheight = \$('#wheelimg').height();
+                    var originx = wheeloffset.left + (wheelwidth / 2);
+                    var originy = wheeloffset.top + (wheelheight / 2);
+                
+                    var x = e.pageX - originx;
+                    var y = e.pageY - originy;
+                
+                    if (x == 0) {
+                        if (y <= 0) {
+                            return 90.0;
+                        }
+                        else {
+                            return 270.0;
+                        }
+                    }
+                    var slope = (y / x);
+                    var angle = Math.atan( slope ) * (180 / 3.141592);
+                
+                    if (y >= 0 && x >= 0) {
+                        angle = (90 - angle) + 270.0;
+                    }
+                    if (y >= 0 && x < 0) {
+                        angle = -angle + 180.0;
+                    }
+                    if( y < 0 && x < 0) {
+                        angle = (90 - angle) + 90.0;
+                    }
+                    if (y < 0 && x >= 0) {
+                        angle = -angle;
+                    }
+                
+                    if (angle == 360.0) {
+                        return 0.0;
+                    }
+                    else {
+                        return angle;
+                    }
+                }
+                
+                
+                function clickCipherWheel(e) {
+                    var angle = getAngle(e);
+                
+                    if (wheelIsRotating) {
+                        wheelIsRotating = false;
+                        \$('#wheelinfo').html('Click wheel to rotate.');
+                        adjustment = parseInt((startAngle - angle) / 6.9230);
+                        startRotation = mod(adjustment + startRotation, 52)
+                        return;
+                    }
+                    else {
+                        startAngle = angle;
+                        wheelIsRotating = true;
+                        \$('#wheelinfo').html('Click wheel to stop rotating.');
+                    }
+                }
+                
+                function mod(a, b) {
+                    return ((a % b) + b) % b;
+                }
+                
+                function showRotation(n) {
+                    \$('#wheelimg').css('background-position', (n * -400).toString() + 'px 0px');
+                
+                    // # rotate the number line at the bottom:
+                    var flag = "the shadowConcern";
+                    var notLinedUp = (n % 2 == 1);
+                    var charCode = flag.charCodeAt(0) + Math.floor((52 - n) / 2);
+                    var i = 0;
+                    var s = '';
+
+
+                
+                    if (!notLinedUp) {
+                        s += '&nbsp;';
+                    }
+                
+                    while (i < flag.length){
+                        charCode = flag.charCodeAt(i)
+                        charCode = ((charCode - 65 + n) % 26) + 65;
+                        schar = String.fromCharCode(charCode);
+                        s += '&nbsp;' + schar;
+                        i += 1;
+                    }
+
+                    // while (i < 26) {
+                    //     if ((charCode - 65) > 25) {
+                    //         charCode = ((charCode - 65) % 26) + 65;
+                    //     }
+                
+                    //     schar = String.fromCharCode(charCode);
+                
+                    //     if (charCode == 65) {
+                    //         s += '&nbsp;<u>' + schar + '</u>&nbsp;';
+                    //     } else {
+                    //         if (schar.length == 1) {
+                    //             schar = '&nbsp;' + schar;
+                    //         }
+                    //         s += schar + '&nbsp;';
+                    //     }
+                    //     i += 1;
+                    //     charCode += 1;
+                
+                    // }
+                    \$('#shiftedLetters').html(s);
+                }
+                
+                function rotateCipherWheel(e) {
+                    if (!wheelIsRotating) {
+                        return;
+                    }
+                    adjustment = parseInt((startAngle - getAngle(e)) / 6.9230);
+                    showRotation(mod(adjustment + startRotation, 52));
+                }
+                
+                \$('#wheelimg').mousemove( rotateCipherWheel );
+                \$('#wheelimg').click( clickCipherWheel );
+                showRotation(0);
+                </script>
+    
+
+
+
+			</div>				
+		</center>
+
+	</body>
+</html>

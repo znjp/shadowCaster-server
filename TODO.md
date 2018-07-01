@@ -32,6 +32,8 @@
 
 - Make puzzles simpler to integrate, or at least write some documentation on how to.
 
+- Update stunstatus polliung to include a "Agent nearby poll"?
+
 
 ## New Puzzle Ideas
 - Lights Out

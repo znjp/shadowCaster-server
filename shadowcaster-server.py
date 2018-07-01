@@ -48,7 +48,7 @@ NOGPIO = True
 RED = 11
 GREEN = 13
 BLUE = 15
-
+#GRD = 6, 9, 14
 
 try:
     import RPi.GPIO as GPIO
@@ -84,8 +84,7 @@ urls = ('/', 'sc',
         '/setEnergyLevel', 'setEnergyLevel',
         '/printTeams', 'printTeams')
 app = web.application(urls, globals())
-
-session = web.session.Session(app, web.session.DiskStore('sessions'))
+session = web.session.Session(app, web.session.DiskStore('sessions'), initializer={'logged_in':False, 'user':""})
 
 
 def init_leds(t=5):
@@ -241,7 +240,6 @@ class release:
     def GET(self):
         global COLOR
         global ENERGY
-        global STUNNED
 
         if not session.get('logged_in'):
             raise web.seeother('/login')
@@ -258,7 +256,8 @@ class release:
             raise web.seeother('/login')
 
         if agent["solved"] == 1:
-            return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released", agent["flag"])
+            #return render.login(None, 0, SHADOWCASTER, COLOR, "agent light already released", agent["flag"])
+            return render.release(SHADOWCASTER, COLOR, True, agent["flag"])
 
         # Get solved key and validate
         user_data = web.input(e="", _unicode=False)
@@ -271,6 +270,10 @@ class release:
 
         ENERGY = ENERGY - 10
         setColor()
+        num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), energy = ENERGY)        
+        if num_updated != 1 and DEBUG:
+            print "Error updating energy level"
+
 
         threading.Thread(target=releaseLights).start()
 
@@ -278,7 +281,7 @@ class release:
         if num_updated != 1 and DEBUG:
             print "Error updating solved status for agent."
 
-        return render.release(SHADOWCASTER, agent["flag"]) 
+        return render.release(SHADOWCASTER, COLOR, False, agent["flag"]) 
 
 
 class login:
@@ -299,7 +302,6 @@ class login:
 
     def GET(self):
         global COLOR
-        global STUNNED
         global STUNTIME
 
         # If we have a logged in user, redirect them to the puzzle
@@ -354,7 +356,6 @@ class logout:
 
 class sc:
     global db
-    global STUNNED
     global ENERGY
     global COLOR
 
@@ -402,6 +403,8 @@ class sc:
             return render.logicGrid2(STUNTIME)
         elif SHADOWCASTER == 12:
             return render.lightsout(STUNTIME)
+        elif SHADOWCASTER == 13:
+            return render.wheel(STUNTIME)
 
         return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "error: no puzzle", None)
 
@@ -409,23 +412,28 @@ class sc:
 class stun:
     def GET(self):
         return """<html>
-        <head>
-        <link href='/static/font.css' rel='stylesheet'>
-        <style>
-			input {
-   				width: 100px;
-				height: 40px;
-				font-size: 300px;
-				font-family: 'Quantico'
-			 }
-		</style>
-        </head>
-        <body bgcolor='#00000000'><center>
+        <head><link href='/static/font.css' rel='stylesheet'></head>
+        <body bgcolor="black">
+        <center>
         <form method='POST' action='/stun'>
-        <input type='submit' value='Stun!'></form>
-        <p><form method='POST' action='/unstun'>
-        <input type='submit' value='Unstun!'></form>
+        <button style="height:200px;width:200px;background-color: #ccc;border: 2px solid red;font-family: 'Quantico'" type='submit' value='Stun'><font color="red"><h1>Stun</h1></font></button>
+        </form>
+        <p>
+        <form method='POST' action='/unstun'>
+        <button style="height:200px;width:200px;background-color: #ccc;font-family: 'Quantico'" type='submit' value='Unstun'><h1>Unstun!</h1></button>
+        </form>
         </center></body></html>"""
+  
+        #         
+        # <style>
+		# 	input {
+   		# 		width: 100px;
+		# 		height: 40px;
+		# 		font-size: 300px;
+		# 		font-family: 'Quantico'
+        #         font-color: 'red'
+		# 	 }
+		# </style>
 
     def POST(self):
         threading.Thread(target=stunLights).start()

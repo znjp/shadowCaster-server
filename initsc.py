@@ -3,7 +3,7 @@ import sqlite3, os, hashlib
 #Login Names
 agents = ["alpha","bravo","charlie","delta","echo","foxtrot","golf","hotel","india","juliet"]
 #Total Number of puzzles
-total = 12
+total = 13
 #Per-game secret
 secret = str(os.urandom(16)).encode("base64")
 
