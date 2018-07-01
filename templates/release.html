@@ -16,7 +16,7 @@ $def with (num, color, solved, flag)
 					font-family: 'Quantico'
 				}
 		</style>
-		<script type="text/javascript">
+		<!-- <script type="text/javascript">
 			function sleep(ms) {
 				return new Promise(resolve => setTimeout(resolve, ms));
 			}
@@ -35,7 +35,7 @@ $def with (num, color, solved, flag)
 					await sleep(50);
 				}
 			}
-		</script>
+		</script> -->
 	</head>
 	<body bgcolor="black">
 		<center>
@@ -43,7 +43,7 @@ $def with (num, color, solved, flag)
 				<img id="logo" width=300 src="/static/$(color).png">
 				<div class="concern">shadowCaster $(num): <font color="white">agent light already released</font></div><p>
 			$else:
-				<img id="logo" width=300 src="/static/white.png" onload=flash()>
+				<img id="logo" width=300 src="/static/release.gif">
 				<div class="concern">shadowCaster $(num): <font color="white">releasing light</font></div><p>
 			$if flag:
 				<p><div class="flag">[ $(flag) ]</div>
