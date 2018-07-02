@@ -1,4 +1,4 @@
-$def with (stunned)
+$def with (stuntime)
 
 <html>
 	<head><title>Logic Game</title>
@@ -64,12 +64,12 @@ $def with (stunned)
 
   <body>
 
-    $if stunned > 0:
+    $if stuntime > 0:
       <img id="logo" width=300 src="/static/red.png" onload=flash()>
       <div class="concern" id="timer">STUNNED</div>
       <script src="/static/timer.js"></script>
       <script>
-        setTimer(document.getElementById("timer"), $(stunned));
+        setTimer(document.getElementById("timer"), $(stuntime));
         setTimeout(function() {
           window.location.reload(1);
         }, 5000);

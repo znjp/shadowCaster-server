@@ -36,7 +36,7 @@
 
 
 ## New Puzzle Ideas
-- Lights Out
+- <strike>Lights Out</strike>
 - "plug board" substitution cipher
 
 #### To Categorize

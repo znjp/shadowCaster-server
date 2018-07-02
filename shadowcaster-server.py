@@ -2,18 +2,11 @@
 import web
 import hashlib
 import os
-import random
 import string
 import time
-import pickle
 from web import form
 import threading
-import signal
-import json
 import sqlite3
-import fileinput
-from subprocess import call
-
 
 # This line causes this script to be somewhat unresponsive to ctrl-C
 web.config.debug = False
@@ -438,17 +431,6 @@ class stun:
         <button style="height:200px;width:200px;background-color: #ccc;font-family: 'Quantico'" type='submit' value='Unstun'><h1>Unstun!</h1></button>
         </form>
         </center></body></html>"""
-  
-        #         
-        # <style>
-		# 	input {
-   		# 		width: 100px;
-		# 		height: 40px;
-		# 		font-size: 300px;
-		# 		font-family: 'Quantico'
-        #         font-color: 'red'
-		# 	 }
-		# </style>
 
     def POST(self):
         threading.Thread(target=stunLights).start()
