@@ -15,16 +15,22 @@
 
 - <strike>when changing shadowcaster # reset the database, including recomputing flags</strike>
 
+- SC13: Make wheel drag with a touch/tap
+
+- Create a separete "releasing light" state, which looks visually distinct from stunning, as conflating with stunning is confusing
+
+- Color needs to be correctly set on boot/reboot
+
+- Flags/passwords must not have ambigious characters; look into English word maps
+
 ### Low to Medium Priority
 - <strike>Shorter flags, in case copy and paste doesn't work</strike>
 
 - <strike>Reveal flag on "you've already released this flag" page </strike>
 
-- More points for early solves
+- Create a flag generation scheme that can't be solved through code inspection; will require server-side verification; H(r || solved state?); this might need to be per-puzzle, which will be a little lame
 
-- Create a flag generation scheme that can't be solved through code inspection
-
-- Refactor to remove JavaScript processing
+- Refactor to remove JavaScript processing; Move stun and release animations from JS to gif
 
 - <strike>I solved SC5, then visited SC6 and it said it had already been solved. Look into this.</strike>
 
@@ -34,10 +40,21 @@
 
 - Update stunstatus polliung to include a "Agent nearby poll"?
 
+- Add an "off" color, should all the energy be drained
+
+- More space between [] and flags/passwords and perhaps differnet color
+
+- Better shadowCaster build: brighter LEDs; 3D printed cubes; on/off buttons; sounds?
+
+- Move from web.py to Flask or something else? Unclear how robust web.py is to multiple connections.
+
+- Configure routers/Pi to host a DNS server; allowing puzzles to be found by http://shadowcaster 
+
 
 ## New Puzzle Ideas
 - <strike>Lights Out</strike>
 - "plug board" substitution cipher
+- Morse code-type challenge; cube pulses?
 
 #### To Categorize
 ##### Admin Interface for SC
@@ -49,6 +66,7 @@
  - <strike> template for printing out team credentials </strike>
  - Single button to Reset everything (all solves, energy levels) for new game
  - <strike> changing sc number resets all flags and sloved status </strike>
+ - Print teams & flags
 
 ##### Real DB integration
  - <stirke> teams</strike>
@@ -65,6 +83,13 @@
 - Rotate SA locations (inside/outside) if it's cold
 - Make sure there are places to hide around SC locations
 - Stunning maybe takes points away?
-- Glow sticks for SAs
+- Glow sticks/LED string lights for SAs
 - Explain the rules of flag submitting
 - More points for early solves (motivate splitting up/working independently)
+- Should releasing light stun/disable the shadowCaster? If yes, it causes a mechanic where two teams at the same caster race to complete it.
+- Make the last challenge helping everyone else solve the remaining challenges
+- Put WiFi adapters back on Pi 2s; will allow for easier updates
+- Consider adding "coallition" forces or a headquarters to contact to help with puzzles
+- Have players practice connecting and flag submitting at start of game (start game at first caster?)
+- "This is part of game/phone number" labels 
+- More points for early solves?
