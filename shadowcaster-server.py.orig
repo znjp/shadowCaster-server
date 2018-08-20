@@ -2,17 +2,21 @@
 import web
 import hashlib
 import os
+import random
 import string
 import time
+import pickle
 from web import form
 import threading
+import signal
+import json
 import sqlite3
+import fileinput
+from subprocess import call
 import math
 import unicornhat as unicorn
 
 
-# Experimental LED matrix implementation:
-import ledFuncs
 
 # This line causes this script to be somewhat unresponsive to ctrl-C
 web.config.debug = False
@@ -43,26 +47,26 @@ RELEASING = False
 STUNTIME = 0  # Stun time remaining
 
 # GPIO Settings
-##NOGPIO = True
-### Pin outs for LEDs
-##RED = 11
-##GREEN = 13
-##BLUE = 15
+NOGPIO = True
+# Pin outs for LEDs
+RED = 11
+GREEN = 13
+BLUE = 15
 #GRD = 6, 9, 14
 
-##try:
-##    import RPi.GPIO as GPIO
-##    GPIO.setmode(GPIO.BOARD)
-##    GPIO.setup(RED, GPIO.OUT)
-##    GPIO.setup(GREEN, GPIO.OUT)
-##    GPIO.setup(BLUE, GPIO.OUT)
-##    # Set the initial color
-##    GPIO.output(BLUE, True)
-##    NOGPIO = False
-##except:
-##    print time.strftime("%a, %d %b %Y %H:%M:%S",
-##                        time.localtime()) + " No GPIO. Going to DEBUG mode."
-##    NOGPIO = True
+try:
+    import RPi.GPIO as GPIO
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(RED, GPIO.OUT)
+    GPIO.setup(GREEN, GPIO.OUT)
+    GPIO.setup(BLUE, GPIO.OUT)
+    # Set the initial color
+    GPIO.output(BLUE, True)
+    NOGPIO = False
+except:
+    print time.strftime("%a, %d %b %Y %H:%M:%S",
+                        time.localtime()) + " No GPIO. Going to DEBUG mode."
+    NOGPIO = True
 
 render = web.template.render('templates/')
 urls = ('/', 'sc',
@@ -88,90 +92,80 @@ session = web.session.Session(app, web.session.DiskStore('sessions'), initialize
 
 
 def init_leds(t=5):
-    global leds
-    global COLOR
-##    while t:
-##        GPIO.output(RED, True)
-##        time.sleep(.25)
-##        GPIO.output(RED, False)
-##        time.sleep(.25)
-##        GPIO.output(GREEN, True)
-##        time.sleep(.25)
-##        GPIO.output(GREEN, False)
-##        time.sleep(.25)
-##        GPIO.output(BLUE, True)
-##        time.sleep(.25)
-##        GPIO.output(BLUE, False)
-##        time.sleep(.25)
-##        GPIO.output(RED, True)
-##        GPIO.output(GREEN, True)
-##        GPIO.output(BLUE, True)
-##        time.sleep(.25)
-##        GPIO.output(RED, False)
-##        GPIO.output(GREEN, False)
-##        GPIO.output(BLUE, False)
-##        time.sleep(.25)
-##        t -= 1
-##    GPIO.output(BLUE, True)
-##    GPIO.output(GREEN, False)
-##    GPIO.output(RED, False)
+    while t:
+        GPIO.output(RED, True)
+        time.sleep(.25)
+        GPIO.output(RED, False)
+        time.sleep(.25)
+        GPIO.output(GREEN, True)
+        time.sleep(.25)
+        GPIO.output(GREEN, False)
+        time.sleep(.25)
+        GPIO.output(BLUE, True)
+        time.sleep(.25)
+        GPIO.output(BLUE, False)
+        time.sleep(.25)
+        GPIO.output(RED, True)
+        GPIO.output(GREEN, True)
+        GPIO.output(BLUE, True)
+        time.sleep(.25)
+        GPIO.output(RED, False)
+        GPIO.output(GREEN, False)
+        GPIO.output(BLUE, False)
+        time.sleep(.25)
+        t -= 1
+    GPIO.output(BLUE, True)
+    GPIO.output(GREEN, False)
+    GPIO.output(RED, False)
 
-    leds = ledFuncs.LedHandler()
-    leds.color = COLOR
 
 def releaseLights():
     global STUNNED
     global STUNTIME
     global RELEASING
-    global leds
 
     STUNNED = True
     RELEASING = True
     STUNTIME = RELEASEDURATION
-    leds.releaseTime = RELEASEDURATION
     threading.Thread(target=countdown).start()
-    
-    leds.startRelease()
-
     now = time.time()
-##    # Turn off the lights
-##    if not NOGPIO:
-##        GPIO.output(RED, False)
-##        GPIO.output(GREEN, False)
-##        GPIO.output(BLUE, False)
+    # Turn off the lights
+    if not NOGPIO:
+        GPIO.output(RED, False)
+        GPIO.output(GREEN, False)
+        GPIO.output(BLUE, False)
     while(time.time() < now + RELEASEDURATION and STUNNED):
-        time.sleep(1)
-##        if DEBUG and NOGPIO:
-##            print "WIN!"
-##            time.sleep(.6)
-##        # Sparkle the lights
-##        else:
-##            GPIO.output(RED, True)
-##            time.sleep(.1)
-##            GPIO.output(RED, False)
-##            time.sleep(.1)
-##            GPIO.output(GREEN, True)
-##            time.sleep(.1)
-##            GPIO.output(GREEN, False)
-##            time.sleep(.1)
-##            GPIO.output(BLUE, True)
-##            time.sleep(.1)
-##            GPIO.output(BLUE, False)
-##            time.sleep(.1)
-##    # Set the original color
-##    if not NOGPIO:
-##        if COLOR == "red":
-##            GPIO.output(RED, True)
-##            GPIO.output(GREEN, False)
-##            GPIO.output(BLUE, False)
-##        if COLOR == "green":
-##            GPIO.output(GREEN, True)
-##            GPIO.output(RED, False)
-##            GPIO.output(BLUE, False)
-##        if COLOR == "blue":
-##            GPIO.output(BLUE, True)
-##            GPIO.output(GREEN, False)
-##            GPIO.output(RED, False)
+        if DEBUG and NOGPIO:
+            print "WIN!"
+            time.sleep(.6)
+        # Sparkle the lights
+        else:
+            GPIO.output(RED, True)
+            time.sleep(.1)
+            GPIO.output(RED, False)
+            time.sleep(.1)
+            GPIO.output(GREEN, True)
+            time.sleep(.1)
+            GPIO.output(GREEN, False)
+            time.sleep(.1)
+            GPIO.output(BLUE, True)
+            time.sleep(.1)
+            GPIO.output(BLUE, False)
+            time.sleep(.1)
+    # Set the original color
+    if not NOGPIO:
+        if COLOR == "red":
+            GPIO.output(RED, True)
+            GPIO.output(GREEN, False)
+            GPIO.output(BLUE, False)
+        if COLOR == "green":
+            GPIO.output(GREEN, True)
+            GPIO.output(RED, False)
+            GPIO.output(BLUE, False)
+        if COLOR == "blue":
+            GPIO.output(BLUE, True)
+            GPIO.output(GREEN, False)
+            GPIO.output(RED, False)
     STUNNED = False
     RELEASING = False
 
@@ -188,59 +182,49 @@ def countdown():
 def stunLights():
     global STUNNED
     global STUNTIME
-    global leds
     now = time.time()
 
     STUNNED = True
     STUNTIME = STUNDURATION
-    leds.stunTime = STUNDURATION
     threading.Thread(target=countdown).start()
-
-    leds.startStun()
-    
-##    # Turn off the lights
-##    if not NOGPIO:
-##        GPIO.output(RED, False)
-##        GPIO.output(GREEN, False)
-##        GPIO.output(BLUE, False)
-##    # Flash the lights
-
+    # Turn off the lights
+    if not NOGPIO:
+        GPIO.output(RED, False)
+        GPIO.output(GREEN, False)
+        GPIO.output(BLUE, False)
+    # Flash the lights
     while(time.time() < now + STUNDURATION and STUNNED):
-        time.sleep(1)
-        
-##        if DEBUG and NOGPIO:
-##            print "STUN."
-##            time.sleep(.3)
-##        else:
-##            GPIO.output(RED, True)
-##            time.sleep(.25)
-##            GPIO.output(RED, False)
-##            time.sleep(.25)
-##            GPIO.output(RED, True)
-##            time.sleep(.25)
-##            GPIO.output(RED, False)
-##            time.sleep(.25)
-##    # Set the original color
-##    if not NOGPIO:
-##        if COLOR == "red":
-##            GPIO.output(RED, True)
-##            GPIO.output(GREEN, False)
-##            GPIO.output(BLUE, False)
-##        if COLOR == "green":
-##            GPIO.output(GREEN, True)
-##            GPIO.output(RED, False)
-##            GPIO.output(BLUE, False)
-##        if COLOR == "blue":
-##            GPIO.output(BLUE, True)
-##            GPIO.output(GREEN, False)
-##            GPIO.output(RED, False)
-            
+        if DEBUG and NOGPIO:
+            print "STUN."
+            time.sleep(.3)
+        else:
+            GPIO.output(RED, True)
+            time.sleep(.25)
+            GPIO.output(RED, False)
+            time.sleep(.25)
+            GPIO.output(RED, True)
+            time.sleep(.25)
+            GPIO.output(RED, False)
+            time.sleep(.25)
+    # Set the original color
+    if not NOGPIO:
+        if COLOR == "red":
+            GPIO.output(RED, True)
+            GPIO.output(GREEN, False)
+            GPIO.output(BLUE, False)
+        if COLOR == "green":
+            GPIO.output(GREEN, True)
+            GPIO.output(RED, False)
+            GPIO.output(BLUE, False)
+        if COLOR == "blue":
+            GPIO.output(BLUE, True)
+            GPIO.output(GREEN, False)
+            GPIO.output(RED, False)
     STUNNED = False
 
 def setColor():
     global ENERGY
     global COLOR
-    global leds
 
     if ENERGY <= 100 and ENERGY > 70:
         COLOR = "blue"
@@ -250,8 +234,6 @@ def setColor():
         COLOR = "red"
     if DEBUG:
         print "Color is now", COLOR
-        
-    leds.color = COLOR
 
 class energy:
     def GET(self):
@@ -459,6 +441,17 @@ class stun:
         <button style="height:200px;width:200px;background-color: #ccc;font-family: 'Quantico'" type='submit' value='Unstun'><h1>Unstun!</h1></button>
         </form>
         </center></body></html>"""
+  
+        #         
+        # <style>
+		# 	input {
+   		# 		width: 100px;
+		# 		height: 40px;
+		# 		font-size: 300px;
+		# 		font-family: 'Quantico'
+        #         font-color: 'red'
+		# 	 }
+		# </style>
 
     def POST(self):
         threading.Thread(target=stunLights).start()
@@ -471,9 +464,7 @@ class unstun:
         global STUNNED
         global STUNTIME
         global RELEASING
-        global leds
         STUNNED = False
-        leds.stunned = False
         RELEASING = False
         STUNTIME = 0
         referer = web.ctx.env.get('HTTP_REFERER', '/')
@@ -483,9 +474,7 @@ class unstun:
         global STUNNED
         global STUNTIME
         global RELEASING
-        global leds
         STUNNED = False
-        leds.stunned = False
         RELEASING = False
         STUNTIME = 0
         referer = web.ctx.env.get('HTTP_REFERER', '/')
@@ -622,7 +611,6 @@ class setPuzzleNum:
         global STUNNED
         global STUNTIME
         global ENERGY
-        global leds
 
         user = session.get('user')
         if not isAdmin(user):
@@ -644,8 +632,6 @@ class setPuzzleNum:
         setColor()
         STUNNED = False
         STUNTIME = 0
-        leds.stunned = False
-        leds.release = False
 
         #Reset all solved states
         num_updated = db.query('UPDATE agents set solved = 0')
@@ -667,7 +653,6 @@ class setPuzzleNum:
 class setStunTime:
     def POST(self):
         global STUNDURATION
-        global leds
 
         user = session.get('user')
         if not isAdmin(user):
@@ -678,7 +663,6 @@ class setStunTime:
             raise web.seeother('/admin?status=Not a number')
 
         STUNDURATION = int(form["time"].value)
-        leds.stunTime = STUNDURATION
         num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), stun = STUNDURATION)        
         if num_updated != 1 and DEBUG:
             print "Error updating stun duration"
@@ -690,7 +674,6 @@ class setStunTime:
 class setReleaseTime:
     def POST(self):
         global RELEASEDURATION
-        global leds
 
         user = session.get('user')
         if not isAdmin(user):
@@ -701,7 +684,6 @@ class setReleaseTime:
             raise web.seeother('/admin?status=Not a number')
 
         RELEASEDURATION = int(form["time"].value)
-        leds.releaseTime = RELEASEDURATION
         num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), release = RELEASEDURATION)        
         if num_updated != 1 and DEBUG:
             print "Error updating stun duration"
@@ -770,12 +752,12 @@ def notfound():
 if __name__ == "__main__":
     app.notfound = notfound
     #load_db()
-    #if not NOGPIO:
-    init_leds()
+    if not NOGPIO:
+        init_leds()
     app.run()
-##    if not NOGPIO:
-##        print "Shutting down."
-##        GPIO.output(BLUE, False)
-##        GPIO.output(GREEN, False)
-##        GPIO.output(RED, False)
-##        GPIO.cleanup()
+    if not NOGPIO:
+        print "Shutting down."
+        GPIO.output(BLUE, False)
+        GPIO.output(GREEN, False)
+        GPIO.output(RED, False)
+        GPIO.cleanup()
