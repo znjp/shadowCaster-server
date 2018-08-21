@@ -27,14 +27,6 @@ $def with (stunned)
 				setInterval(f, (Math.random() * 2000));
 			}
 
-			async function f(){
-				for(i=0; i < (Math.random() * 16); i++){
-					document.getElementById("logo").src = "/static/red.png";
-					await sleep(50);
-					document.getElementById("logo").src = "/static/white.png";
-					await sleep(50);
-				}
-			}
 			var oReq;
 			function stunReqListener () {
 				//console.log(this.responseText);
@@ -52,7 +44,7 @@ $def with (stunned)
 	<body bgcolor="black">
 		<center>
 		$if stunned > 0:
-			<img id="logo" width=300 src="/static/red.png" onload=flash()>
+			<img id="logo" width=300 src="/static/stun.gif" onload=flash()>
 			<div class="concern" id="timer">STUNNED</div>
 			<script src="/static/timer.js"></script>
 			<script>

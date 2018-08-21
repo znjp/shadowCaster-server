@@ -1,12 +1,9 @@
-# import sys
 import web
-import hashlib
-import os
-import string
-import time
 from web import form
-import threading
-import sqlite3
+import hashlib, os, os.path, threading, string, time, math, sqlite3
+
+# Experimental LED matrix implementation:
+import ledFuncs
 
 # This line causes this script to be somewhat unresponsive to ctrl-C
 web.config.debug = False
@@ -15,10 +12,89 @@ web.config.debug = False
 DEBUG = False
 
 # IMPORTANT: This must be set to the PWD of the python script if run as an init service
-# os.chdir("/home/pi/shadowCaster-server")
+#os.chdir("/home/pi/shadowCaster-server")
+DBFILE = "./scdb.sql"
 
+#DATABASE STUFF
+#Initialize the the database, should it not exist
+if os.path.isfile(DBFILE) == False:
+    connection = sqlite3.connect(DBFILE)
+    cursor = connection.cursor()
+    #Login Names
+    agents = ["alpha","bravo","charlie","delta","echo","foxtrot","golf","hotel","india","juliet"]
+    #Total Number of puzzles
+    total = 13
+    #Per-caster secret (UNUSED)
+    secret = str(os.urandom(16)).encode("base64")
+
+    print "Creating agents...",
+    sql_command = """
+        CREATE TABLE agents (
+            agent VARCHAR(20) PRIMARY KEY,
+            password VARCHAR(20),
+            solved INTEGER,
+            flag VARCHAR(20),
+            admin INTEGER);"""
+    try:
+        cursor.execute(sql_command)
+        for agent in agents:
+            password = hashlib.sha256(agent).digest().encode("base64")[:8]
+            flag = hashlib.sha256("sc1"+agent).digest().encode("base64")[:10]
+            format_str = """INSERT INTO agents (agent, password, solved, flag, admin)
+            VALUES ("{agent}", "{password}" , 0, "{flag}", 0);"""
+            sql_command = format_str.format(agent=agent, password=password, flag=flag)
+            cursor.execute(sql_command)
+    except Exception as e:
+        print "Failed to create agents table: ", str(e)
+        quit()
+
+    #Add special users
+    sql_command = """INSERT INTO agents (agent, password, solved, flag, admin)
+    VALUES ("znjp", "brak4pres" , 0, "flag", 1);"""
+    cursor.execute(sql_command)
+    print "Done."
+
+    print "Create SC configs...",
+    sql_command = """
+        CREATE TABLE IF NOT EXISTS sc (
+            scnum INTEGER PRIMARY KEY,
+            total INTEGER,
+            energy INTEGER,
+            stun INTEGER,
+            release INTEGER,
+            secret VARCHAR(16));"""
+    cursor.execute(sql_command)
+
+    format_str = """INSERT INTO sc (scnum, total, energy, stun, release, secret)
+    VALUES (1, "{total}", 100, 100, 100, "{secret}");"""
+    sql_command = format_str.format(total=total, secret=secret)
+    try:
+        cursor.execute(sql_command)
+    except Exception as e:
+        print "Failed to create SC configs table: ", str(e)
+        quit()
+    print "Done."
+
+    print "Creating sessions table..."
+    sql_command = """
+        CREATE TABLE sessions (
+            session_id char(128) UNIQUE NOT NULL,
+            atime timestamp NOT NULL default current_timestamp,
+            data text
+        );
+    """
+    try:
+        cursor.execute(sql_command)
+    except Exception as e:
+        print "Unable to create sessions table.", str(e)
+        quit()
+    print "Done."
+    connection.commit()
+    connection.close()
+
+#Try opening the database
 try:
-    db = web.database(dbn='sqlite', db='scdb.sql')
+    db = web.database(dbn='sqlite', db=DBFILE)
     result = db.select('sc')
     config = dict(result[0])
 except:
@@ -34,33 +110,33 @@ SECRET = config["secret"] #Game secret
 
 COLOR = "blue" #TODO!!!
 
-# Global variables used for stunning
+# Global variables used for stunning/releasing
 STUNNED = False
 RELEASING = False
 STUNTIME = 0  # Stun time remaining
+mutex = threading.Lock()
 
 # GPIO Settings
-NOGPIO = True
-# Pin outs for LEDs
-RED = 11
-GREEN = 13
-BLUE = 15
+##NOGPIO = True
+### Pin outs for LEDs
+##RED = 11
+##GREEN = 13
+##BLUE = 15
 #GRD = 6, 9, 14
 
-try:
-    import RPi.GPIO as GPIO
-    NOGPIO = False
-    GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(RED, GPIO.OUT)
-    GPIO.setup(GREEN, GPIO.OUT)
-    GPIO.setup(BLUE, GPIO.OUT)
-except:
-    print time.strftime("%a, %d %b %Y %H:%M:%S",
-                        time.localtime()) + " No GPIO. Going to DEBUG mode."
-    DEBUG = True
-    #setColor() TODO!!!
-#set the initial color
-
+##try:
+##    import RPi.GPIO as GPIO
+##    GPIO.setmode(GPIO.BOARD)
+##    GPIO.setup(RED, GPIO.OUT)
+##    GPIO.setup(GREEN, GPIO.OUT)
+##    GPIO.setup(BLUE, GPIO.OUT)
+##    # Set the initial color
+##    GPIO.output(BLUE, True)
+##    NOGPIO = False
+##except:
+##    print time.strftime("%a, %d %b %Y %H:%M:%S",
+##                        time.localtime()) + " No GPIO. Going to DEBUG mode."
+##    NOGPIO = True
 
 render = web.template.render('templates/')
 urls = ('/', 'sc',
@@ -82,84 +158,120 @@ urls = ('/', 'sc',
         '/setEnergyLevel', 'setEnergyLevel',
         '/printTeams', 'printTeams')
 app = web.application(urls, globals())
-session = web.session.Session(app, web.session.DiskStore('sessions'), initializer={'logged_in':False, 'user':""})
+store = web.session.DBStore(db, 'sessions')
+session = web.session.Session(app, store, initializer={'logged_in':False, 'user':""})
 
 
-def init_leds(t=3):
-    while t:
-        GPIO.output(RED, True)
-        time.sleep(.25)
-        GPIO.output(RED, False)
-        time.sleep(.25)
-        GPIO.output(GREEN, True)
-        time.sleep(.25)
-        GPIO.output(GREEN, False)
-        time.sleep(.25)
-        GPIO.output(BLUE, True)
-        time.sleep(.25)
-        GPIO.output(BLUE, False)
-        time.sleep(.25)
-        GPIO.output(RED, True)
-        GPIO.output(GREEN, True)
-        GPIO.output(BLUE, True)
-        time.sleep(.25)
-        GPIO.output(RED, False)
-        GPIO.output(GREEN, False)
-        GPIO.output(BLUE, False)
-        time.sleep(.25)
-        t -= 1
-    GPIO.output(BLUE, True)
-    GPIO.output(GREEN, False)
-    GPIO.output(RED, False)
+def init_leds(t=5):
+    global leds
+    global COLOR
+##    while t:
+##        GPIO.output(RED, True)
+##        time.sleep(.25)
+##        GPIO.output(RED, False)
+##        time.sleep(.25)
+##        GPIO.output(GREEN, True)
+##        time.sleep(.25)
+##        GPIO.output(GREEN, False)
+##        time.sleep(.25)
+##        GPIO.output(BLUE, True)
+##        time.sleep(.25)
+##        GPIO.output(BLUE, False)
+##        time.sleep(.25)
+##        GPIO.output(RED, True)
+##        GPIO.output(GREEN, True)
+##        GPIO.output(BLUE, True)
+##        time.sleep(.25)
+##        GPIO.output(RED, False)
+##        GPIO.output(GREEN, False)
+##        GPIO.output(BLUE, False)
+##        time.sleep(.25)
+##        t -= 1
+##    GPIO.output(BLUE, True)
+##    GPIO.output(GREEN, False)
+##    GPIO.output(RED, False)
 
+    #NB: A mutex is another term for a lock. I think it makes sense
+    # to put a lock around the use of the LEDs, meaning only one
+    # thread at a time. There are two kinds of locks: blocking and unblocking,
+    # blocking is where a thread will wait until an acquired lock is unlocked
+    # and unblocking is where it will just fail. I think we want unblocking
+    # and have any led requests fail. I THINK. Keep this in mind as you
+    # make your updates.
+
+    # Acquire the LED lock; if it's already locked, then just return
+    if mutex.acquire(False) == False:
+        return # LED operation fails
+
+    try:
+        leds = ledFuncs.LedHandler()
+        leds.color = COLOR
+    finally:
+        mutex.release()
 
 def releaseLights():
     global STUNNED
     global STUNTIME
     global RELEASING
+    global leds
 
     STUNNED = True
     RELEASING = True
     STUNTIME = RELEASEDURATION
+    leds.releaseTime = RELEASEDURATION
     threading.Thread(target=countdown).start()
+    
+    # Acquire the LED lock; if it's already locked, then just return
+    if mutex.acquire(False) == False:
+        return # LED operation fails
+
+    try:
+        leds.startRelease()
+    finally:
+        mutex.release()
+
+    #NB: I'm not sure what this is doing. Can't this function just return?
+    # Maybe it's to wait setting those sentinal values at the bottom?
+    # If so, that should be handled by the LED thread, I think.
     now = time.time()
-    # Turn off the lights
-    if not NOGPIO:
-        GPIO.output(RED, False)
-        GPIO.output(GREEN, False)
-        GPIO.output(BLUE, False)
+##    # Turn off the lights
+##    if not NOGPIO:
+##        GPIO.output(RED, False)
+##        GPIO.output(GREEN, False)
+##        GPIO.output(BLUE, False)
     while(time.time() < now + RELEASEDURATION and STUNNED):
-        if DEBUG and NOGPIO:
-            print "WIN!"
-            time.sleep(.6)
-        # Sparkle the lights
-        else:
-            GPIO.output(RED, True)
-            time.sleep(.1)
-            GPIO.output(RED, False)
-            time.sleep(.1)
-            GPIO.output(GREEN, True)
-            time.sleep(.1)
-            GPIO.output(GREEN, False)
-            time.sleep(.1)
-            GPIO.output(BLUE, True)
-            time.sleep(.1)
-            GPIO.output(BLUE, False)
-            time.sleep(.1)
-    # Set the original color
-    if not NOGPIO:
-        if COLOR == "red":
-            GPIO.output(RED, True)
-            GPIO.output(GREEN, False)
-            GPIO.output(BLUE, False)
-        if COLOR == "green":
-            GPIO.output(GREEN, True)
-            GPIO.output(RED, False)
-            GPIO.output(BLUE, False)
-        if COLOR == "blue":
-            GPIO.output(BLUE, True)
-            GPIO.output(GREEN, False)
-            GPIO.output(RED, False)
+        time.sleep(1)
+##        if DEBUG and NOGPIO:
+##            print "WIN!"
+##            time.sleep(.6)
+##        # Sparkle the lights
+##        else:
+##            GPIO.output(RED, True)
+##            time.sleep(.1)
+##            GPIO.output(RED, False)
+##            time.sleep(.1)
+##            GPIO.output(GREEN, True)
+##            time.sleep(.1)
+##            GPIO.output(GREEN, False)
+##            time.sleep(.1)
+##            GPIO.output(BLUE, True)
+##            time.sleep(.1)
+##            GPIO.output(BLUE, False)
+##            time.sleep(.1)
+##    # Set the original color
+##    if not NOGPIO:
+##        if COLOR == "red":
+##            GPIO.output(RED, True)
+##            GPIO.output(GREEN, False)
+##            GPIO.output(BLUE, False)
+##        if COLOR == "green":
+##            GPIO.output(GREEN, True)
+##            GPIO.output(RED, False)
+##            GPIO.output(BLUE, False)
+##        if COLOR == "blue":
+##            GPIO.output(BLUE, True)
+##            GPIO.output(GREEN, False)
+##            GPIO.output(RED, False)
     STUNNED = False
     RELEASING = False
 
@@ -176,49 +288,67 @@ def countdown():
 def stunLights():
     global STUNNED
     global STUNTIME
+    global leds
     now = time.time()
 
     STUNNED = True
     STUNTIME = STUNDURATION
+    leds.stunTime = STUNDURATION
     threading.Thread(target=countdown).start()
-    # Turn off the lights
-    if not NOGPIO:
-        GPIO.output(RED, False)
-        GPIO.output(GREEN, False)
-        GPIO.output(BLUE, False)
-    # Flash the lights
+
+    # Acquire the LED lock; if it's already locked, then just return
+    if mutex.acquire(False) == False:
+        return # LED operation fails
+
+    try:
+        leds.startStun()
+    finally:
+        mutex.release()
+    
+##    # Turn off the lights
+##    if not NOGPIO:
+##        GPIO.output(RED, False)
+##        GPIO.output(GREEN, False)
+##        GPIO.output(BLUE, False)
+##    # Flash the lights
+
+    #NB: Same thing here. Remove and move sentinel operations elsewhere.
     while(time.time() < now + STUNDURATION and STUNNED):
-        if DEBUG and NOGPIO:
-            print "STUN."
-            time.sleep(.3)
-        else:
-            GPIO.output(RED, True)
-            time.sleep(.25)
-            GPIO.output(RED, False)
-            time.sleep(.25)
-            GPIO.output(RED, True)
-            time.sleep(.25)
-            GPIO.output(RED, False)
-            time.sleep(.25)
-    # Set the original color
-    if not NOGPIO:
-        if COLOR == "red":
-            GPIO.output(RED, True)
-            GPIO.output(GREEN, False)
-            GPIO.output(BLUE, False)
-        if COLOR == "green":
-            GPIO.output(GREEN, True)
-            GPIO.output(RED, False)
-            GPIO.output(BLUE, False)
-        if COLOR == "blue":
-            GPIO.output(BLUE, True)
-            GPIO.output(GREEN, False)
-            GPIO.output(RED, False)
+        time.sleep(1)
+        
+##        if DEBUG and NOGPIO:
+##            print "STUN."
+##            time.sleep(.3)
+##        else:
+##            GPIO.output(RED, True)
+##            time.sleep(.25)
+##            GPIO.output(RED, False)
+##            time.sleep(.25)
+##            GPIO.output(RED, True)
+##            time.sleep(.25)
+##            GPIO.output(RED, False)
+##            time.sleep(.25)
+##    # Set the original color
+##    if not NOGPIO:
+##        if COLOR == "red":
+##            GPIO.output(RED, True)
+##            GPIO.output(GREEN, False)
+##            GPIO.output(BLUE, False)
+##        if COLOR == "green":
+##            GPIO.output(GREEN, True)
+##            GPIO.output(RED, False)
+##            GPIO.output(BLUE, False)
+##        if COLOR == "blue":
+##            GPIO.output(BLUE, True)
+##            GPIO.output(GREEN, False)
+##            GPIO.output(RED, False)
+            
     STUNNED = False
 
 def setColor():
     global ENERGY
     global COLOR
+    global leds
 
     if ENERGY <= 100 and ENERGY > 70:
         COLOR = "blue"
@@ -228,19 +358,25 @@ def setColor():
         COLOR = "red"
     if DEBUG:
         print "Color is now", COLOR
-    if not NOGPIO:
-        if COLOR == "red":
-            GPIO.output(RED, True)
-            GPIO.output(GREEN, False)
-            GPIO.output(BLUE, False)
-        if COLOR == "green":
-            GPIO.output(GREEN, True)
-            GPIO.output(RED, False)
-            GPIO.output(BLUE, False)
-        if COLOR == "blue":
-            GPIO.output(BLUE, True)
-            GPIO.output(GREEN, False)
-            GPIO.output(RED, False)       
+    # if not NOGPIO:
+    #     if COLOR == "red":
+    #         GPIO.output(RED, True)
+    #         GPIO.output(GREEN, False)
+    #         GPIO.output(BLUE, False)
+    #     if COLOR == "green":
+    #         GPIO.output(GREEN, True)
+    #         GPIO.output(RED, False)
+    #         GPIO.output(BLUE, False)
+    #     if COLOR == "blue":
+    #         GPIO.output(BLUE, True)
+    #         GPIO.output(GREEN, False)
+    #         GPIO.output(RED, False)       
+    
+
+    #NB: Does this actully set the color, or just a set a value
+    # that's read? If it's the former, we probably need to add 
+    # a lock here. If it's the latter, probably not.
+    leds.color = COLOR
 
 class energy:
     def GET(self):
@@ -295,6 +431,8 @@ class release:
         if num_updated != 1 and DEBUG:
             print "Error updating energy level"
 
+        #NB: I don't think this needs to be a thread any more, if your LED 
+        # library creates its own thread.
         threading.Thread(target=releaseLights).start()
 
         num_updated  = db.update('agents', where='agent = "' + agent["agent"] +'"', solved = 1)
@@ -450,6 +588,7 @@ class stun:
         </center></body></html>"""
 
     def POST(self):
+        #NB: Does this need to be threaded here? I don't think so anymore.
         threading.Thread(target=stunLights).start()
         referer = web.ctx.env.get('HTTP_REFERER', '/')
         raise web.seeother(referer)
@@ -460,7 +599,10 @@ class unstun:
         global STUNNED
         global STUNTIME
         global RELEASING
+        global leds
+        #NB: This needs to work with your code now.
         STUNNED = False
+        leds.stunned = False
         RELEASING = False
         STUNTIME = 0
         referer = web.ctx.env.get('HTTP_REFERER', '/')
@@ -470,7 +612,9 @@ class unstun:
         global STUNNED
         global STUNTIME
         global RELEASING
+        global leds
         STUNNED = False
+        leds.stunned = False
         RELEASING = False
         STUNTIME = 0
         referer = web.ctx.env.get('HTTP_REFERER', '/')
@@ -484,6 +628,8 @@ class stunstatus:
 
 
 ########## ADMIN FUNCTIONS ###############
+#NB: make sure these all work with your LED code now.
+
 puzzlenumForm = form.Form(
     form.Dropdown('mydrop', zip(range(1, TOTALPUZZLES + 1), range(1,
                                                                   TOTALPUZZLES + 1)), style="font-family: Quantico; font-size: 30px;"),
@@ -570,6 +716,7 @@ class testRelease:
         if not isAdmin(user):
             raise web.seeother('/login')
 
+        #NB: Does this need to be threaded here any more?
         threading.Thread(target=releaseLights).start()
         raise web.seeother('/admin')
 
@@ -579,6 +726,7 @@ class testRelease:
         if not isAdmin(user):
             raise web.seeother('/login')
 
+        #NB: Does this need to be threaded here any more?
         threading.Thread(target=releaseLights).start()
         raise web.seeother('/admin')
 
@@ -589,6 +737,7 @@ class testStun:
         if not isAdmin(user):
             raise web.seeother('/login')
 
+        #NB: Does this need to be threaded here any more?
         threading.Thread(target=stunLights).start()
         raise web.seeother('/admin')
 
@@ -597,6 +746,7 @@ class testStun:
         if not isAdmin(user):
             raise web.seeother('/login')
 
+        #NB: Does this need to be threaded here any more?
         threading.Thread(target=stunLights).start()
         raise web.seeother('/admin')
 
@@ -607,6 +757,7 @@ class setPuzzleNum:
         global STUNNED
         global STUNTIME
         global ENERGY
+        global leds
 
         user = session.get('user')
         if not isAdmin(user):
@@ -628,6 +779,8 @@ class setPuzzleNum:
         setColor()
         STUNNED = False
         STUNTIME = 0
+        leds.stunned = False
+        leds.release = False
 
         #Reset all solved states
         num_updated = db.query('UPDATE agents set solved = 0')
@@ -649,6 +802,7 @@ class setPuzzleNum:
 class setStunTime:
     def POST(self):
         global STUNDURATION
+        global leds
 
         user = session.get('user')
         if not isAdmin(user):
@@ -659,6 +813,7 @@ class setStunTime:
             raise web.seeother('/admin?status=Not a number')
 
         STUNDURATION = int(form["time"].value)
+        leds.stunTime = STUNDURATION
         num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), stun = STUNDURATION)        
         if num_updated != 1 and DEBUG:
             print "Error updating stun duration"
@@ -670,6 +825,7 @@ class setStunTime:
 class setReleaseTime:
     def POST(self):
         global RELEASEDURATION
+        global leds
 
         user = session.get('user')
         if not isAdmin(user):
@@ -680,6 +836,7 @@ class setReleaseTime:
             raise web.seeother('/admin?status=Not a number')
 
         RELEASEDURATION = int(form["time"].value)
+        leds.releaseTime = RELEASEDURATION
         num_updated = db.update('sc', where='scnum = ' + str(SHADOWCASTER), release = RELEASEDURATION)        
         if num_updated != 1 and DEBUG:
             print "Error updating stun duration"
@@ -748,12 +905,12 @@ def notfound():
 if __name__ == "__main__":
     app.notfound = notfound
     #load_db()
-    if not NOGPIO:
-        init_leds()
+    #if not NOGPIO:
+    init_leds()
     app.run()
-    if not NOGPIO:
-        print "Shutting down."
-        GPIO.output(BLUE, False)
-        GPIO.output(GREEN, False)
-        GPIO.output(RED, False)
-        GPIO.cleanup()
+##    if not NOGPIO:
+##        print "Shutting down."
+##        GPIO.output(BLUE, False)
+##        GPIO.output(GREEN, False)
+##        GPIO.output(RED, False)
+##        GPIO.cleanup()

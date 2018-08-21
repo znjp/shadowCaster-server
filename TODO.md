@@ -17,16 +17,22 @@
 
 - SC13: Make wheel drag with a touch/tap
 
-- Create a separete "releasing light" state, which looks visually distinct from stunning, as conflating with stunning is confusing
+- NB: Create a separete "releasing light" state, which looks visually distinct from stunning, as conflating with stunning is confusing
 
-- Color needs to be correctly set on boot/reboot
+- NB: Color needs to be correctly set on boot/reboot
 
-- Flags/passwords must not have ambigious characters; look into English word maps
+- NB: Correctly integrate unicornhat project into SC project
+
+- Flags/passwords must not have ambigious characters; look into English word maps or Base58 encoding
+
+- Double check to see if the XML Request code for checking stun status is correct; meaning that connections are properly closed. (Some of our previous failing issues came from having too many open connections.)
 
 ### Low to Medium Priority
 - <strike>Shorter flags, in case copy and paste doesn't work</strike>
 
 - <strike>Reveal flag on "you've already released this flag" page </strike>
+
+- NB: Create a way for flags to be auto-submitted should a WiFi network exist. So the puzzle it only served on a private network, but flags can be submitted to a public scorebaord.
 
 - Create a flag generation scheme that can't be solved through code inspection; will require server-side verification; H(r || solved state?); this might need to be per-puzzle, which will be a little lame
 
@@ -40,7 +46,7 @@
 
 - Update stunstatus polliung to include a "Agent nearby poll"?
 
-- Add an "off" color, should all the energy be drained
+- NB: Add an "completely released" LED visual/state, should all the energy be drained
 
 - More space between [] and flags/passwords and perhaps differnet color
 
@@ -48,7 +54,7 @@
 
 - Move from web.py to Flask or something else? Unclear how robust web.py is to multiple connections.
 
-- Configure routers/Pi to host a DNS server; allowing puzzles to be found by http://shadowcaster 
+- NB: Configure routers/Pi to host a DNS server; allowing puzzles to be found by http://shadowcaster 
 
 
 ## New Puzzle Ideas
@@ -66,11 +72,12 @@
  - <strike> template for printing out team credentials </strike>
  - Single button to Reset everything (all solves, energy levels) for new game
  - <strike> changing sc number resets all flags and sloved status </strike>
- - Print teams & flags
+ - <strike>Print teams & flags<strike>
 
 ##### Real DB integration
  - <stirke> teams</strike>
  - <strike>sc settings</strike>
+ - session cookies
 
 ##### Scoreboard integration
  - Have a way to configure the auto submitting of flags if the SC's can have internet access
