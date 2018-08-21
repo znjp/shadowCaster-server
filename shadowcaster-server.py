@@ -10,17 +10,20 @@ import sqlite3
 
 # This line causes this script to be somewhat unresponsive to ctrl-C
 web.config.debug = False
-DEBUG = True
 
 # SHADOWCASTER GLOBAL SETTINGS
+DEBUG = False
 
 # IMPORTANT: This must be set to the PWD of the python script if run as an init service
 # os.chdir("/home/pi/shadowCaster-server")
 
-
-db = web.database(dbn='sqlite', db='scdb.sql')
-result = db.select('sc')
-config = dict(result[0])
+try:
+    db = web.database(dbn='sqlite', db='scdb.sql')
+    result = db.select('sc')
+    config = dict(result[0])
+except:
+    print "Database error: This is no database!"
+    quit()
 
 SHADOWCASTER = config["scnum"]  # SC Number
 TOTALPUZZLES = config["total"]  # Total Number of Puzzles
@@ -29,7 +32,7 @@ STUNDURATION = config["stun"]  # Stun duration in seconds
 RELEASEDURATION = config["release"]  # Release duration In seconds
 SECRET = config["secret"] #Game secret
 
-COLOR = "blue"  # Initial color
+COLOR = "blue" #TODO!!!
 
 # Global variables used for stunning
 STUNNED = False
@@ -46,17 +49,18 @@ BLUE = 15
 
 try:
     import RPi.GPIO as GPIO
+    NOGPIO = False
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(RED, GPIO.OUT)
     GPIO.setup(GREEN, GPIO.OUT)
     GPIO.setup(BLUE, GPIO.OUT)
-    # Set the initial color
-    GPIO.output(BLUE, True)
-    NOGPIO = False
 except:
     print time.strftime("%a, %d %b %Y %H:%M:%S",
                         time.localtime()) + " No GPIO. Going to DEBUG mode."
-    NOGPIO = True
+    DEBUG = True
+    #setColor() TODO!!!
+#set the initial color
+
 
 render = web.template.render('templates/')
 urls = ('/', 'sc',
@@ -81,7 +85,7 @@ app = web.application(urls, globals())
 session = web.session.Session(app, web.session.DiskStore('sessions'), initializer={'logged_in':False, 'user':""})
 
 
-def init_leds(t=5):
+def init_leds(t=3):
     while t:
         GPIO.output(RED, True)
         time.sleep(.25)
@@ -224,6 +228,19 @@ def setColor():
         COLOR = "red"
     if DEBUG:
         print "Color is now", COLOR
+    if not NOGPIO:
+        if COLOR == "red":
+            GPIO.output(RED, True)
+            GPIO.output(GREEN, False)
+            GPIO.output(BLUE, False)
+        if COLOR == "green":
+            GPIO.output(GREEN, True)
+            GPIO.output(RED, False)
+            GPIO.output(BLUE, False)
+        if COLOR == "blue":
+            GPIO.output(BLUE, True)
+            GPIO.output(GREEN, False)
+            GPIO.output(RED, False)       
 
 class energy:
     def GET(self):

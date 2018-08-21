@@ -56,7 +56,8 @@ $def with (stuntime)
         $else:
             <script>setInterval(makeStunRequest, 5000);</script>
             <div id="gameArea">
-            <script type="text/javascript" src="/static/jquery-1.6.3.js"></script>
+            <!--<script type="text/javascript" src="/static/jquery-1.6.3.js"></script>-->
+            <script src="/static/jquery-2.2.4.min.js"></script>
             <div id="wheelimg" style="margin-left: auto; margin-right: auto; width: 400px; height: 400px; background-image:url('/static/wheelsprite.png')"></div>
             <br />
             <div id="error" class="error">&nbsp;</div>
@@ -178,8 +179,10 @@ $def with (stuntime)
                     showRotation(mod(adjustment + startRotation, 52));
                 }
                 
-                \$('#wheelimg').mousemove( rotateCipherWheel );
-                \$('#wheelimg').click( clickCipherWheel );
+                //\$('#wheelimg').mousemove( rotateCipherWheel );
+                //\$('#wheelimg').click( clickCipherWheel );
+                \$('#wheelimg').on('mousemove', rotateCipherWheel );
+                \$('#wheelimg').on('click', clickCipherWheel );
                 showRotation(0);
                 </script>
                     
