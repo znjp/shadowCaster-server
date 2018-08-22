@@ -19,7 +19,7 @@
 
 - NB: Create a separete "releasing light" state, which looks visually distinct from stunning, as conflating with stunning is confusing
 
-- NB: Color needs to be correctly set on boot/reboot
+- <strike>NB: Color needs to be correctly set on boot/reboot</strike>
 
 - NB: Correctly integrate unicornhat project into SC project
 

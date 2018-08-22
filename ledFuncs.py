@@ -6,40 +6,30 @@ import time
 import threading
 import random
 
-# import unicornhathd as unicorn
-import unicornhat as unicorn
+try:
+    import unicornhat as unicorn
+except:
+    print time.strftime("%a, %d %b %Y %H:%M:%S",
+                        time.localtime()) + " No GPIO. Going to DEBUG mode."
+    settings.NOGPIO = True    
 
-#NB: Another thing that's needed is a way to stop these threads. I think the 
-# way to do that is to check a global sentinel value (e.g. while STUNNED == True)
+# IMPORT GLOBAL SETTINGS
+import settings
 
 class LedHandler:
 
     def __init__(self):
         self.on = True
-
-        # default stun & release time = 100, can be changed
         
-        #NB: These should receive their values from the database, and
-        # should be updatable
-        self.stunTime = 100
-        self.releaseTime = 100
-
-        # booleans used as control structure for threads
-        self.idle = True
-        self.stunned = False
-        self.release = False
-
         self.restartStun = False
         self.restartRelease = False
 
-        # color is changed within the server file, defaults to blue
-        self.color = "blue"
-
-        # initialize the unicorn hat settings
-        unicorn.brightness(1)
-        unicorn.set_layout(unicorn.AUTO)
-        unicorn.rotation(0)
-        self.u_width,self.u_height = unicorn.get_shape()
+        if not settings.NOGPIO:
+            # initialize the unicorn hat settings
+            unicorn.brightness(1)
+            unicorn.set_layout(unicorn.AUTO)
+            unicorn.rotation(0)
+            self.u_width,self.u_height = unicorn.get_shape()
 
         # starts an idle thread
         idle_thread = threading.Thread(target=self.idleLED)
@@ -48,31 +38,31 @@ class LedHandler:
 
     # unused, idle thread starts in constructor
     # idle thread automatically restarts itself if idle, stunned, and release are false
-    def startIdle(self):
-        self.idle = False
-        self.stunned = False
-        self.release = False    
+##    def startIdle(self):
+##        self.idle = False
+##        self.stunned = False
+##        self.release = False    
 
     # starts a stunned thread and stops other led threads
     # if already stunned, restarts current stun thread
     def startStun(self):
-        self.idle = False
-        self.release = False
-        if self.stunned == True:
+        settings.IDLE = False
+        if settings.STUNNED and not settings.RELEASING:
             self.restartStun = True
         else:
-            self.stunned = True
+            settings.STUNNED = True
+            settings.RELEASING = False
             threading.Thread(target=self.stunnedLED).start()
 
     # starts a release thread and stops other led threads
     # if already releasing, restarts current thread
     def startRelease(self):
-        self.idle = False
-        self.stunned = False
-        if self.release == True:
+        settings.IDLE = False
+        if settings.RELEASING and settings.STUNNED:
             self.restartRelease = True
         else:
-            self.release = True
+            settings.RELEASING = True
+            settings.STUNNED = True
             threading.Thread(target=self.releaseLED).start()
 
 
@@ -85,118 +75,143 @@ class LedHandler:
         step = 50
         dim = True
 
-        while self.idle and not self.stunned and not self.release:
-        # Loop over all pixels
-            for y in range(self.u_height):
-                for x in range(self.u_width):
-                    
-                    if self.color == "blue":
-                        r = 0
-                        g = 0
-                        b = step * 5
-                    if self.color == "green":
-                        r = 0
-                        g = step * 5
-                        b = 0
-                    if self.color == "red":
-                        r = step * 5
-                        g = 0
-                        b = 0
+        flash = True
 
-                    # Makes sure we stay between 0 - 255
-                    r = int(max(0, min(255, r)))
-                    g = int(max(0, min(255, g)))
-                    b = int(max(0, min(255, b)))
-                    
-                    unicorn.set_pixel(x, y, r, g, b)                   
-            unicorn.show()
-            
-            if step >= 50:
-                dim = True
-                time.sleep(3)
-            elif step <= 0:
-                dim = False
-
-            if dim:
-                step -= 0.08
+        while settings.IDLE and not settings.STUNNED and not settings.RELEASING:
+            if settings.DEBUG and settings.NOGPIO:
+                print "IDLE."
+                time.sleep(1)
             else:
-                step += 0.08
+                # Loop over all pixels
+                for y in range(self.u_height):
+                    for x in range(self.u_width):
+                        
+                        if settings.COLOR == "blue":
+                            r = 0
+                            g = 0
+                            b = step * 5
+                        if settings.COLOR == "green":
+                            r = 0
+                            g = step * 5
+                            b = 0
+                        if settings.COLOR == "red":
+                            r = step * 5
+                            g = 0
+                            b = 0
+                        if settings.COLOR == "empty":
+                            if flash:
+                                r = 100
+                                g = 0
+                                b = 120
+                            else:
+                                r = 0
+                                g = 0
+                                b = 0
+
+                        # Makes sure we stay between 0 - 255
+                        r = int(max(0, min(255, r)))
+                        g = int(max(0, min(255, g)))
+                        b = int(max(0, min(255, b)))
+                        
+                        unicorn.set_pixel(x, y, r, g, b)                   
+                unicorn.show()
+
+                if settings.COLOR != "empty":
+                    if step >= 50:
+                        dim = True
+                        time.sleep(3)
+                    elif step <= 0:
+                        dim = False
+
+                    if dim:
+                        step -= 0.08
+                    else:
+                        step += 0.08
+                else:
+                    if flash:
+                        time.sleep(random.random() / 3)
+                        flash = False
+                    else:
+                        time.sleep(random.random())
+                        flash = True
 
         while self.on:
             time.sleep(0.5)
-            if self.on and self.idle == False and self.stunned == False and self.release == False:
-                self.idle = True
+            if self.on and not settings.IDLE and not settings.STUNNED and not settings.RELEASING:
+                settings.IDLE = True
                 break
             
-        if self.on and self.idle == True:
+        if self.on and settings.IDLE == True:
             self.idleLED()
 
 
     # flashes all LED's red - random delays
     # restarts the function if self.restartStun == True
-    # lasts for (self.stunTime) seconds
     def stunnedLED(self):
 
         step = 0
         red = False
 
-        start_time = time.time()
-
-        while time.time() - start_time < self.stunTime and self.stunned and not self.restartStun:
-        # Loop over all pixels
-            for y in range(self.u_height):
-                for x in range(self.u_width):
-                    r = step * 10
-                    g = 0
-                    b = 0
-
-                    # Makes sure we stay between 0 - 255
-                    r = int(max(0, min(255, r)))
-                    g = int(max(0, min(255, g)))
-                    b = int(max(0, min(255, b)))
-                    unicorn.set_pixel(x, y, r, g, b)
-            unicorn.show()
-            if step >= 25:
-                dim = True
-            elif step <= 0:
-                dim = False
-
-            if dim:
-                step -= 0.5
+        while (settings.STUNTIME > 0 and settings.STUNNED
+                                and not self.restartStun and not settings.RELEASING):
+            if settings.DEBUG and settings.NOGPIO:
+                print "STUN."
+                time.sleep(.3)
             else:
-                step += 0.5
+                # Loop over all pixels
+                for y in range(self.u_height):
+                    for x in range(self.u_width):
+                        r = step * 10
+                        g = 0
+                        b = 0
+
+                        # Makes sure we stay between 0 - 255
+                        r = int(max(0, min(255, r)))
+                        g = int(max(0, min(255, g)))
+                        b = int(max(0, min(255, b)))
+                        unicorn.set_pixel(x, y, r, g, b)
+                unicorn.show()
+                if step >= 25:
+                    dim = True
+                elif step <= 0:
+                    dim = False
+
+                if dim:
+                    step -= 0.5
+                else:
+                    step += 0.5
 
         if self.restartStun:
             self.restartStun = False
             self.stunnedLED()
 
-        self.stunned = False
+        if settings.STUNNED and not settings.RELEASING:
+            settings.STUNNED = False
+
+        settings.STUNTIME = 0
 
 
     # starts a rainbow animation on the LED's
     # pulled from unicornhat example files
-    # lasts for (self.releaseTime) seconds
     def releaseLED(self):
 
         start_time = time.time()
-        interval = float(self.releaseTime) / 32
+        interval = float(settings.RELEASEDURATION) / 32
 
         i = 0.0
         offset = 30
 
 
-        while time.time() - start_time <= self.releaseTime and self.release and not self.restartRelease:
-            i = i + 0.3
-            for y in range(self.u_height):
-                for x in range(self.u_width):
+        while (settings.STUNTIME > 0 and settings.RELEASING
+                                        and settings.STUNNED and not self.restartRelease):
+            if settings.DEBUG and settings.NOGPIO:
+                print "STUN."
+                time.sleep(.3)
+            else:
+                i = i + 0.3
+                for y in range(self.u_height):
+                    for x in range(self.u_width):
 
-                    led_num = y + (x * 4)
-
-                    if False: #led_num < (time.time() - start_time) / interval:
-                        r = 0
-                        g = 0
-                        b = 250
-                    else:
                         r = (math.cos((x+i)/2.0) + math.cos((y+i)/2.0)) * 64.0 + 128.0
                         g = (math.sin((x+i)/1.5) + math.sin((y+i)/2.0)) * 64.0 + 128.0
                         b = (math.sin((x+i)/2.0) + math.cos((y+i)/1.5)) * 64.0 + 128.0
@@ -205,30 +220,34 @@ class LedHandler:
                         g = max(1, min(255, g + offset))
                         b = max(5, min(255, b + offset))
                         unicorn.set_pixel(x,y,int(r),int(g),int(b))
-            unicorn.show()
-            time.sleep(0.01)
+                unicorn.show()
+                time.sleep(0.01)
 
         if self.restartRelease:
             self.restartRelease = False
             self.releaseLED()
 
-        self.release = False
+        if settings.RELEASING and settings.STUNNED:
+            settings.RELEASING = False
+            settings.STUNNED = False
+
+        settings.STUNTIME = 0
 
     # stopps all threads and turns the unicorn hat off
     def off(self):
         self.on = False
-        self.idle = False
-        self.stunned = False
-        self.release = False
+        settings.IDLE = False
+        settings.STUNNED = False
+        settings.RELEASING = False
         time.sleep(0.5)
         unicorn.off()
 
     # restarts the idle thread from off state
     def start(self):
         self.on = True
-        self.idle = True
-        self.stunned = False
-        self.release = False
+        settings.IDLE = True
+        settings.STUNNED = False
+        settings.RELEASING = False
         threading.Thread(target=self.idleLED).start()
 
 
