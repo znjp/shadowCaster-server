@@ -6,21 +6,21 @@ import time
 import threading
 import random
 
+# IMPORT GLOBAL SETTINGS
+import settings
+
 try:
     import unicornhat as unicorn
 except:
     print time.strftime("%a, %d %b %Y %H:%M:%S",
                         time.localtime()) + " No GPIO. Going to DEBUG mode."
-    settings.NOGPIO = True    
-
-# IMPORT GLOBAL SETTINGS
-import settings
+    settings.NOGPIO = True
 
 class LedHandler:
 
     def __init__(self):
         self.on = True
-        
+
         self.restartStun = False
         self.restartRelease = False
 
@@ -83,9 +83,8 @@ class LedHandler:
                 time.sleep(1)
             else:
                 # Loop over all pixels
-                for y in range(self.u_height):
+		for y in range(self.u_height):
                     for x in range(self.u_width):
-                        
                         if settings.COLOR == "blue":
                             r = 0
                             g = 0

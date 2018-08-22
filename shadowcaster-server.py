@@ -2,13 +2,12 @@ import web
 from web import form
 import hashlib, os, os.path, threading, string, time, math, sqlite3
 
-# Experimental LED matrix implementation:
-import ledFuncs
-
-
 # import all global vars
 import settings
 settings.init()
+
+# import led package
+import ledFuncs
 
 
 # This line causes this script to be somewhat unresponsive to ctrl-C
