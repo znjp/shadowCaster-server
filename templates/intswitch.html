@@ -1,4 +1,4 @@
-$def with (stunned)
+$def with (stunned, releasing)
 <html>
 	<head><title>Integer Switches</title>
 		<link href='/static/font.css' rel='stylesheet'>
@@ -39,6 +39,18 @@ $def with (stunned)
 				oReq.send();
 			}
 
+			var rReq;
+			function releaseReqListener () {
+				//console.log(this.responseText);
+				if(this.responseText == "True"){window.location.reload(1);}
+			}
+			function makeReleaseRequest(){
+				rReq = new XMLHttpRequest();
+				rReq.addEventListener("load", releaseReqListener);
+				rReq.open("GET", "/releasestatus");
+				rReq.send();
+			}
+
 		</script>
 	</head>
 	<body bgcolor="black">
@@ -51,8 +63,17 @@ $def with (stunned)
 				setTimer(document.getElementById("timer"), $(stunned) );
 				setTimeout(function(){window.location.reload(1);}, 5000);
 			</script>
+		$if releasing > 0:
+			<img id="logo" width=300 src="/static/release.gif" onload=flash()>
+			<div class="concern" id="timer">RELEASING</div>
+			<script src="/static/timer.js"></script>
+			<script>
+				setTimer(document.getElementById("timer"), $(releasing) );
+				setTimeout(function(){window.location.reload(1);}, 5000);
+			</script>
 		$else:
 			<script>setInterval(makeStunRequest, 5000);</script>
+			<script>setInterval(makeReleaseRequest, 5000);</script>
 			<div id="gameArea">
 				<h4 id="currentNum"><!-- 0 --></h4>
 				<div class="concern"><h3 id='mainHeading'><!-- Please Convert from Decimal to Binary --></h3></div>

@@ -17,15 +17,17 @@
 
 - SC13: Make wheel drag with a touch/tap
 
-- NB: Create a separete "releasing light" state, which looks visually distinct from stunning, as conflating with stunning is confusing
+- <strike>NB: Create a separete "releasing light" state, which looks visually distinct from stunning, as conflating with stunning is confusing</strike>
 
 - <strike>NB: Color needs to be correctly set on boot/reboot</strike>
 
-- NB: Correctly integrate unicornhat project into SC project
+- NB: Determine best way to integrate UnicornHat project
 
 - Flags/passwords must not have ambigious characters; look into English word maps or Base58 encoding
 
 - Double check to see if the XML Request code for checking stun status is correct; meaning that connections are properly closed. (Some of our previous failing issues came from having too many open connections.)
+
+- NB: Fix tabbing issue that shows the puzzle underneath stunning timer on "sc" page
 
 ### Low to Medium Priority
 - <strike>Shorter flags, in case copy and paste doesn't work</strike>

@@ -114,6 +114,7 @@ urls = ('/', 'sc',
         '/stun', 'stun',  # stun the shadowcaster
         '/unstun', 'unstun',  # unstun the shadowcaster
         '/stunstatus', 'stunstatus',  # Is the shadowcaster stunned?
+        '/releasestatus', 'releasestatus', # Is the shadowcaster releasing?
         '/login',  'login',  # login
         '/logout', 'logout',  # logout
         '/energy', 'energy',  # current energy level
@@ -154,45 +155,66 @@ def init_leds(t=5):
 
 def releaseLights():
 
-    settings.STUNTIME = settings.RELEASEDURATION
-    threading.Thread(target=countdown).start()
     
     # Acquire the LED lock; if it's already locked, then just return
     if mutex.acquire(False) == False:
         return # LED operation fails
 
+    settings.RELEASING = True
+    settings.IDLE = False
+    settings.STUNNED = False
+
+    settings.STUNTIME = 0
+    settings.RELEASTIME = 0
+    time.sleep(0.1)
+    settings.RELEASETIME = settings.RELEASEDURATION
+
+    threading.Thread(target=countdown).start()
+
     try:
-        settings.LEDS.startRelease()
+        threading.Thread(target=settings.LEDS.releaseLED).start()
     finally:
         mutex.release()
 
 
 def countdown():
-    while settings.STUNTIME:
-        settings.STUNTIME -= 1
-        if settings.DEBUG:
-            print settings.STUNTIME
-        time.sleep(1)
+    
+    if settings.STUNNED:
+        while settings.STUNTIME:
+            settings.STUNTIME -= 1
+            if settings.DEBUG:
+                print settings.STUNTIME
+            time.sleep(1)
+    elif settings.RELEASING:
+        while settings.RELEASETIME:
+            settings.RELEASETIME -= 1
+            if settings.DEBUG:
+                print settings.RELEASETIME
+            time.sleep(1)
+        
 
 
 def stunLights():
-
-    settings.STUNTIME = settings.STUNDURATION
-    threading.Thread(target=countdown).start()
 
     # Acquire the LED lock; if it's already locked, then just return
     if mutex.acquire(False) == False:
         return # LED operation fails
 
+    settings.STUNNED = True
+    settings.RELEASING = False
+    settings.IDLE = False
+
+    settings.STUNTIME = 0
+    settings.RELEASETIME = 0
+    time.sleep(0.1)
+    settings.STUNTIME = settings.STUNDURATION
+
+    threading.Thread(target=countdown).start()
+
     try:
-        settings.LEDS.startStun()
+        threading.Thread(target=settings.LEDS.stunnedLED).start()
     finally:
         mutex.release()
-
-    #Fix NOGPIO mode
-##        if DEBUG and NOGPIO:
-##            print "STUN."
-##            time.sleep(.3)
 
         
 def setColor():
@@ -362,7 +384,7 @@ class sc:
             #return render.login(None, STUNTIME, SHADOWCASTER, COLOR, "agent light already released", agent["flag"])
 
         if settings.SHADOWCASTER == 1:
-            return render.intswitch(settings.STUNTIME)
+            return render.intswitch(settings.STUNTIME, settings.RELEASETIME)
         elif settings.SHADOWCASTER == 2:
             return render.hexswitch(settings.STUNTIME)
         elif settings.SHADOWCASTER == 3:
@@ -432,6 +454,10 @@ class unstun:
 class stunstatus:
     def GET(self):
         return settings.STUNNED
+
+class releasestatus:
+    def GET(self):
+        return settings.RELEASING
 
 
 ########## ADMIN FUNCTIONS ###############

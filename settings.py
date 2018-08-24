@@ -11,7 +11,9 @@ def init():
     global STUNNED
     global RELEASING
     global IDLE
+    
     global STUNTIME
+    global RELEASETIME
 
     global LEDS
 
@@ -25,7 +27,9 @@ def init():
     STUNNED = False
     RELEASING = False
     IDLE = True
+    
     STUNTIME = 0
+    RELEASETIME = 0
 
 def init_db_settings(config):
 

@@ -46,23 +46,19 @@ class LedHandler:
     # starts a stunned thread and stops other led threads
     # if already stunned, restarts current stun thread
     def startStun(self):
-        settings.IDLE = False
-        if settings.STUNNED and not settings.RELEASING:
+        if settings.STUNNED:
             self.restartStun = True
         else:
             settings.STUNNED = True
-            settings.RELEASING = False
             threading.Thread(target=self.stunnedLED).start()
 
     # starts a release thread and stops other led threads
     # if already releasing, restarts current thread
     def startRelease(self):
-        settings.IDLE = False
-        if settings.RELEASING and settings.STUNNED:
+        if settings.RELEASING:
             self.restartRelease = True
         else:
             settings.RELEASING = True
-            settings.STUNNED = True
             threading.Thread(target=self.releaseLED).start()
 
 
@@ -135,7 +131,7 @@ class LedHandler:
                         flash = True
 
         while self.on:
-            time.sleep(0.5)
+            time.sleep(1)
             if self.on and not settings.IDLE and not settings.STUNNED and not settings.RELEASING:
                 settings.IDLE = True
                 break
@@ -152,10 +148,10 @@ class LedHandler:
         red = False
 
         while (settings.STUNTIME > 0 and settings.STUNNED
-                                and not self.restartStun and not settings.RELEASING):
+                                and not self.restartStun):
             if settings.DEBUG and settings.NOGPIO:
                 print "STUN."
-                time.sleep(.3)
+                time.sleep(1)
             else:
                 # Loop over all pixels
                 for y in range(self.u_height):
@@ -184,7 +180,7 @@ class LedHandler:
             self.restartStun = False
             self.stunnedLED()
 
-        if settings.STUNNED and not settings.RELEASING:
+        if settings.STUNNED:
             settings.STUNNED = False
 
         settings.STUNTIME = 0
@@ -201,11 +197,11 @@ class LedHandler:
         offset = 30
 
 
-        while (settings.STUNTIME > 0 and settings.RELEASING
-                                        and settings.STUNNED and not self.restartRelease):
+        while (settings.RELEASETIME > 0 and settings.RELEASING
+                                        and not self.restartRelease):
             if settings.DEBUG and settings.NOGPIO:
-                print "STUN."
-                time.sleep(.3)
+                print "RELEASING."
+                time.sleep(1)
             else:
                 i = i + 0.3
                 for y in range(self.u_height):
@@ -226,11 +222,10 @@ class LedHandler:
             self.restartRelease = False
             self.releaseLED()
 
-        if settings.RELEASING and settings.STUNNED:
+        if settings.RELEASING:
             settings.RELEASING = False
-            settings.STUNNED = False
 
-        settings.STUNTIME = 0
+        settings.RELEASETIME = 0
 
     # stopps all threads and turns the unicorn hat off
     def off(self):
