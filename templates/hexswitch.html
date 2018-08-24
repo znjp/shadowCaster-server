@@ -1,4 +1,4 @@
-$def with (stunned)
+$def with (stunned, releasing)
 <html>
 	<head><title>Hex Switches</title>
 		<link href='/static/font.css' rel='stylesheet'>
@@ -27,23 +27,15 @@ $def with (stunned)
 				setInterval(f, (Math.random() * 2000));
 			}
 
-			async function f(){
-				for(i=0; i < (Math.random() * 16); i++){
-					document.getElementById("logo").src = "/static/red.png";
-					await sleep(50);
-					document.getElementById("logo").src = "/static/white.png";
-					await sleep(50);
-				}
-			}
 			var oReq;
-			function stunReqListener () {
+			function statusReqListener () {
 				//console.log(this.responseText);
 				if(this.responseText == "True"){window.location.reload(1);}
 			}
-			function makeStunRequest(){
+			function makeStatusRequest(){
 				oReq = new XMLHttpRequest();
-				oReq.addEventListener("load", stunReqListener);
-				oReq.open("GET", "/stunstatus");
+				oReq.addEventListener("load", statusReqListener);
+				oReq.open("GET", "/status");
 				oReq.send();
 			}
 		</script>
@@ -51,61 +43,69 @@ $def with (stunned)
 	<body bgcolor="black">
 		<center>
 		$if stunned > 0:
-			<img id="logo" width=300 src="/static/red.png" onload=flash()>
+			<img id="logo" width=300 src="/static/stun.gif" onload=flash()>
 			<div class="concern" id="timer">STUNNED</div>
 			<script src="/static/timer.js"></script>
 			<script>
 				setTimer(document.getElementById("timer"), $(stunned) );
 				setTimeout(function(){window.location.reload(1);}, 5000);
 			</script>
+		$elif releasing > 0:
+			<img id="logo" width=300 src="/static/release.gif" onload=flash()>
+			<div class="concern" id="timer">RELEASING</div>
+			<script src="/static/timer.js"></script>
+			<script>
+				setTimer(document.getElementById("timer"), $(releasing) );
+				setTimeout(function(){window.location.reload(1);}, 5000);
+			</script>
 		$else:
-			<script>setInterval(makeStunRequest, 5000);</script>
+			<script>setInterval(makeStatusRequest, 5000);</script>
 			<div id="gameArea">
 				<h4 id="currentNum"><!-- 0 --></h4>
 				<div class="concern"><h3 id='mainHeading'><!-- Please Convert from Hex to Binary --></h3></div>
-        <table class='game'>
-          <tr>
-            <td id='bin0' class='counter'>0</td>
-            <td id='bin1' class='counter'>0</td>
-            <td id='bin2' class='counter'>0</td>
-            <td id='bin3' class='counter'>0</td>
-            <td id='bin4' class='counter'>0</td>
-            <td id='bin5' class='counter'>0</td>
-            <td id='bin6' class='counter'>0</td>
-            <td id='bin7' class='counter'>0</td>
-          </tr>
-          <tr>
-            <td id='0' class='off toggle'>
-              <div></div>
-            </td>
-            <td id='1' class='off toggle'>
-              <div></div>
-            </td>
-            <td id='2' class='off toggle'>
-              <div></div>
-            </td>
-            <td id='3' class='off toggle'>
-              <div></div>
-            </td>
-            <td id='4' class='off toggle'>
-              <div></div>
-            </td>
-            <td id='5' class='off toggle'>
-              <div></div>
-            </td>
-            <td id='6' class='off toggle'>
-              <div></div>
-            </td>
-            <td id='7' class='off toggle'>
-              <div></div>
-            </td>
-          </tr>
-          <table>
-			</div>
-			<script src="/static/p5.js"></script>
-			<script>var game = "hex";</script>
-      <script src='/static/jquery-2.2.4.min.js'></script>
-			<script src="/static/switchGame.js"></script>
+                        <table class='game'>
+                          <tr>
+                            <td id='bin0' class='counter'>0</td>
+                            <td id='bin1' class='counter'>0</td>
+                            <td id='bin2' class='counter'>0</td>
+                            <td id='bin3' class='counter'>0</td>
+                            <td id='bin4' class='counter'>0</td>
+                            <td id='bin5' class='counter'>0</td>
+                            <td id='bin6' class='counter'>0</td>
+                            <td id='bin7' class='counter'>0</td>
+                          </tr>
+                          <tr>
+                            <td id='0' class='off toggle'>
+                              <div></div>
+                            </td>
+                            <td id='1' class='off toggle'>
+                              <div></div>
+                            </td>
+                            <td id='2' class='off toggle'>
+                              <div></div>
+                            </td>
+                            <td id='3' class='off toggle'>
+                              <div></div>
+                            </td>
+                            <td id='4' class='off toggle'>
+                              <div></div>
+                            </td>
+                            <td id='5' class='off toggle'>
+                              <div></div>
+                            </td>
+                            <td id='6' class='off toggle'>
+                              <div></div>
+                            </td>
+                            <td id='7' class='off toggle'>
+                              <div></div>
+                            </td>
+                          </tr>
+                          <table>
+                                        </div>
+                                        <script src="/static/p5.js"></script>
+                                        <script>var game = "hex";</script>
+                      <script src='/static/jquery-2.2.4.min.js'></script>
+                                        <script src="/static/switchGame.js"></script>
 
 		</center>
 

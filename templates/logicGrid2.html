@@ -1,4 +1,4 @@
-$def with (stunned)
+$def with (stunned, releasing)
 
 <html>
 	<head><title>Logic</title>
@@ -36,26 +36,18 @@ $def with (stunned)
         setInterval(f, (Math.random() * 2000));
       }
 
-      async function f() {
-        for (i = 0; i < (Math.random() * 16); i++) {
-          document.getElementById("logo").src = "/static/red.png";
-          await sleep(50);
-          document.getElementById("logo").src = "/static/white.png";
-          await sleep(50);
-        }
-      }
       var oReq;
 
-      function stunReqListener() {
+      function statusReqListener() {
         if (this.responseText == "True") {
           window.location.reload(1);
         }
       }
 
-      function makeStunRequest() {
+      function makeStatusRequest() {
         oReq = new XMLHttpRequest();
-        oReq.addEventListener("load", stunReqListener);
-        oReq.open("GET", "/stunstatus");
+        oReq.addEventListener("load", statusReqListener);
+        oReq.open("GET", "/status");
         oReq.send();
       }
     </script>
@@ -65,7 +57,7 @@ $def with (stunned)
   <body>
 
     $if stunned > 0:
-      <img id="logo" width=300 src="/static/red.png" onload=flash()>
+      <img id="logo" width=300 src="/static/stun.gif" onload=flash()>
       <div class="concern" id="timer">STUNNED</div>
       <script src="/static/timer.js"></script>
       <script>
@@ -74,8 +66,16 @@ $def with (stunned)
           window.location.reload(1);
         }, 5000);
       </script>
+    $elif releasing > 0:
+     <img id="logo" width=300 src="/static/release.gif" onload=flash()>
+     <div class="concern" id="timer">RELEASING</div>
+     <script src="/static/timer.js"></script>
+     <script>
+       setTimer(document.getElementById("timer"), $(releasing) );
+       setTimeout(function(){window.location.reload(1);}, 5000);
+     </script>
     $else:
-      <script>setInterval(makeStunRequest, 5000);</script>
+      <script>setInterval(makeStatusRequest, 5000);</script>
       <br />
       <br />
       <br />

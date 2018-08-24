@@ -1,4 +1,4 @@
-$def with (form, stuntime, num, color, error, flag)
+$def with (form, stuntime, releasetime, num, color, error, flag)
 
 <html>
 	<head><title>ShadowCaster Login</title>
@@ -36,23 +36,16 @@ $def with (form, stuntime, num, color, error, flag)
 			function flash() {
 				setInterval(f, (Math.random() * 2000));
 			}
-			async function f(){
-				for(i=0; i < (Math.random() * 16); i++){
-					document.getElementById("logo").src = "/static/red.png";
-					await sleep(50);
-					document.getElementById("logo").src = "/static/white.png";
-					await sleep(50);
-				}
-			}
+			
 			var oReq;
-			function stunReqListener () {
+			function stateReqListener () {
 				//console.log(this.responseText);
 				if(this.responseText == "True"){window.location.reload(1);}
 			}
-			function makeStunRequest(){
+			function makeStateRequest(){
 				oReq = new XMLHttpRequest();
-				oReq.addEventListener("load", stunReqListener);
-				oReq.open("GET", "/stunstatus");
+				oReq.addEventListener("load", stateReqListener);
+				oReq.open("GET", "/status");
 				oReq.send();
 			}
 
@@ -61,15 +54,23 @@ $def with (form, stuntime, num, color, error, flag)
 	<body bgcolor="black">
 		<center>
 		$if stuntime > 0:
-			<img id="logo" width=300 src="/static/red.png" onload=flash()>
+			<img id="logo" width=300 src="/static/stun.gif" onload=flash()>
 			<div class="concern" id="timer">STUNNED</div>
 			<script src="/static/timer.js"></script>
 			<script>
 				setTimer(document.getElementById("timer"), $(stuntime) );
 				setTimeout(function(){window.location.reload(1);}, 5000);
 			</script>
+		$elif releasetime > 0:
+			<img id="logo" width=300 src="/static/release.gif" onload=flash()>
+			<div class="concern" id="timer">RELEASING</div>
+			<script src="/static/timer.js"></script>
+			<script>
+				setTimer(document.getElementById("timer"), $(releasetime) );
+				setTimeout(function(){window.location.reload(1);}, 5000);
+			</script>
 		$else:
-			<script>setInterval(makeStunRequest, 5000);</script>
+			<script>setInterval(makeStateRequest, 5000);</script>
 			<img id="logo" width=300 src="/static/$(color).png">
 			<div class="concern"><font color="red"> shadowCaster $(num) </font></div>
 			<form name="main" method="post">

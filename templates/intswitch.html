@@ -28,27 +28,15 @@ $def with (stunned, releasing)
 			}
 
 			var oReq;
-			function stunReqListener () {
+			function stateReqListener () {
 				//console.log(this.responseText);
 				if(this.responseText == "True"){window.location.reload(1);}
 			}
-			function makeStunRequest(){
+			function makeStatusRequest(){
 				oReq = new XMLHttpRequest();
-				oReq.addEventListener("load", stunReqListener);
-				oReq.open("GET", "/stunstatus");
+				oReq.addEventListener("load", stateReqListener);
+				oReq.open("GET", "/status");
 				oReq.send();
-			}
-
-			var rReq;
-			function releaseReqListener () {
-				//console.log(this.responseText);
-				if(this.responseText == "True"){window.location.reload(1);}
-			}
-			function makeReleaseRequest(){
-				rReq = new XMLHttpRequest();
-				rReq.addEventListener("load", releaseReqListener);
-				rReq.open("GET", "/releasestatus");
-				rReq.send();
 			}
 
 		</script>
@@ -63,7 +51,7 @@ $def with (stunned, releasing)
 				setTimer(document.getElementById("timer"), $(stunned) );
 				setTimeout(function(){window.location.reload(1);}, 5000);
 			</script>
-		$if releasing > 0:
+		$elif releasing > 0:
 			<img id="logo" width=300 src="/static/release.gif" onload=flash()>
 			<div class="concern" id="timer">RELEASING</div>
 			<script src="/static/timer.js"></script>
@@ -72,54 +60,53 @@ $def with (stunned, releasing)
 				setTimeout(function(){window.location.reload(1);}, 5000);
 			</script>
 		$else:
-			<script>setInterval(makeStunRequest, 5000);</script>
-			<script>setInterval(makeReleaseRequest, 5000);</script>
+			<script>setInterval(makeStatusRequest, 5000);</script>
 			<div id="gameArea">
 				<h4 id="currentNum"><!-- 0 --></h4>
 				<div class="concern"><h3 id='mainHeading'><!-- Please Convert from Decimal to Binary --></h3></div>
 			</div>
-    	<table class='game'>
-      	<tr>
-          <td id='bin0' class='counter'>0</td>
-          <td id='bin1' class='counter'>0</td>
-          <td id='bin2' class='counter'>0</td>
-          <td id='bin3' class='counter'>0</td>
-          <td id='bin4' class='counter'>0</td>
-          <td id='bin5' class='counter'>0</td>
-          <td id='bin6' class='counter'>0</td>
-          <td id='bin7' class='counter'>0</td>
-        </tr>
-        <tr>
-          <td id='0' class='off toggle'>
-            <div></div>
-          </td>
-          <td id='1' class='off toggle'>
-            <div></div>
-          </td>
-          <td id='2' class='off toggle'>
-            <div></div>
-          </td>
-          <td id='3' class='off toggle'>
-            <div></div>
-          </td>
-          <td id='4' class='off toggle'>
-            <div></div>
-          </td>
-          <td id='5' class='off toggle'>
-            <div></div>
-          </td>
-          <td id='6' class='off toggle'>
-            <div></div>
-          </td>
-          <td id='7' class='off toggle'>
-            <div></div>
-          </td>
-        </tr>
-        <table>
-      <script src='/static/jquery-2.2.4.min.js'></script>
-			<script src="/static/p5.js"></script>
-			<script>var game = "int";</script>
-			<script src="/static/switchGame.js"></script>
+    			<table class='game'>
+      			<tr>
+		          <td id='bin0' class='counter'>0</td>
+		          <td id='bin1' class='counter'>0</td>
+		          <td id='bin2' class='counter'>0</td>
+ 		          <td id='bin3' class='counter'>0</td>
+		          <td id='bin4' class='counter'>0</td>
+		          <td id='bin5' class='counter'>0</td>
+		          <td id='bin6' class='counter'>0</td>
+		          <td id='bin7' class='counter'>0</td>
+		        </tr>
+		        <tr>
+		          <td id='0' class='off toggle'>
+		            <div></div>
+		          </td>
+		          <td id='1' class='off toggle'>
+		            <div></div>
+		          </td>
+		          <td id='2' class='off toggle'>
+		            <div></div>
+		          </td>
+		          <td id='3' class='off toggle'>
+		            <div></div>
+		          </td>
+		          <td id='4' class='off toggle'>
+		            <div></div>
+		          </td>
+		          <td id='5' class='off toggle'>
+		            <div></div>
+		          </td>
+		          <td id='6' class='off toggle'>
+		            <div></div>
+		          </td>
+		          <td id='7' class='off toggle'>
+		            <div></div>
+		          </td>
+		        </tr>
+		        <table>
+		      <script src='/static/jquery-2.2.4.min.js'></script>
+					<script src="/static/p5.js"></script>
+					<script>var game = "int";</script>
+					<script src="/static/switchGame.js"></script>
 
 		</center>
 
